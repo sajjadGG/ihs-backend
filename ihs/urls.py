@@ -21,6 +21,6 @@ from core.urls import router
 #path(r'api/token/' , include('rest_framework.urls') , name='api-token')
 
 urlpatterns = [
-    path(r'api/token/' , include('rest_framework.urls') , name='api-token'),
+    path(r'api/token/' , obtain_auth_token , name='api-token'),
     path(r'api/' , include(router.urls))
 ]

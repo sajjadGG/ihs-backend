@@ -13,6 +13,7 @@ class InsuranceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Insurance
         fields = ('id','orgname',)
+        
 class PatientSerializer(serializers.HyperlinkedModelSerializer):
     username = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
     queryset = User.objects.all())
