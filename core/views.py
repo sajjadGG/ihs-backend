@@ -2,26 +2,17 @@ from rest_framework import viewsets , authentication , permissions
 
 from django.contrib.auth import get_user_model
 
-from .models import Insurance ,Patient
-from .serializers import InsuranceSerializer , PatientSerializer , UserSerializer
+from .models import Insurance ,Patient , Doctor , Treatment
+from .serializers import InsuranceSerializer , PatientSerializer , UserSerializer , DoctorSerializer , TreatmentSerializer
+
+from .mixins import DefaultsMixin, OwnerMixin
 
 User = get_user_model()
 
-class DefaultsMixin():
-    """Default settings for view authentication , permissions , filtering and pagination"""
 
-    authentication_classes = (
-        authentication.BasicAuthentication,
-        authentication.TokenAuthentication,
-    )
 
-    permission_classes = (
-        permissions.IsAuthenticated,
-    )
 
-    paginate_by = 25
-    paginate_by_param = 'page_size'
-    max_paginate_by = 100
+
 
 # Create your views here.
 
@@ -33,19 +24,32 @@ class InsuranceViewSet(DefaultsMixin,viewsets.ModelViewSet):
     serializer_class = InsuranceSerializer
 
 
-class PatientViewSet(DefaultsMixin , viewsets.ModelViewSet):
-
+class PatientViewSet(OwnerMixin , viewsets.ModelViewSet):
+    lookup_field = 'user__username'
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
 
-class UserViewSet(DefaultsMixin , viewsets.ReadOnlyModelViewSet):
+class UserViewSet(DefaultsMixin , viewsets.ModelViewSet):
 
-    lookup_field = User.USERNAME_FIELD
+    lookup_field = 'username'
     lookup_url_kwarg = User.USERNAME_FIELD
     queryset = User.objects.order_by(User.USERNAME_FIELD)
     serializer_class = UserSerializer
+    
+    def get_permissions(self):
+        if self.request.method =='POST':
+            self.permission_classes = (permissions.AllowAny,)
+        return super(UserViewSet , self).get_permissions()
+            
 
+class DoctorViewSet(OwnerMixin , viewsets.ModelViewSet):
+    lookup_field = 'user__username'
+    queryset = Doctor.objects.all()
+    serializer_class = DoctorSerializer
 
+class TreatmentViewSet(DefaultsMixin , viewsets.ModelViewSet):
+    queryset = Treatment.objects.all()
+    serializer_class = TreatmentSerializer
 
 
 

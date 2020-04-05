@@ -5,5 +5,7 @@ from . import views
 router = DefaultRouter()
 
 router.register(r'insurances' , views.InsuranceViewSet)
-router.register(r'patients' , views.PatientViewSet)
-router.register(r'users',views.UserViewSet , 'userModel')
+router.register(r'patients' , views.PatientViewSet , 'patient')
+router.register(r'users',views.UserViewSet , 'user')
+router.register(r'doctors',views.DoctorViewSet , 'doctor')
+#router.register(r'treatments',views.TreatmentViewSet)
