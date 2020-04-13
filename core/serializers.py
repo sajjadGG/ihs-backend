@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
-from .models import Insurance , Patient , Doctor , Treatment
+from .models import Insurance , Patient , Doctor , Treatment , Message , Follower
 
 from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
@@ -10,7 +10,17 @@ User = get_user_model()
 
 #TODO :  define owner for all serialize based on who can change it
 
-class InsuranceSerializer(serializers.HyperlinkedModelSerializer):
+class FollowerSerializer(serializers.ModelSerializer):
+    followee = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
+    queryset = User.objects.all())
+    follower = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
+    queryset = User.objects.all())
+    class Meta:
+        model = Follower
+        fields = ('id' , 'followee' , 'follower' )
+
+class InsuranceSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Insurance
         fields = ('id','orgname',)
@@ -24,7 +34,7 @@ class PatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = ('user' , 'nationalId' , 'diseaseHistory' , 
-        'insurance' , 'supplementalInsurance' , 'weight' , 'height' , 'friends' , 'owner' )
+        'insurance' , 'supplementalInsurance' , 'weight' , 'height'  , 'owner' ,'avatar' , 'phone_number')
 
     
 class UserSerializer(serializers.ModelSerializer):
@@ -32,15 +42,18 @@ class UserSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source = 'username')
     class Meta:
         model = User
-        fields = ( User.USERNAME_FIELD , 'full_name' ,'password', 'is_active' , 'email' , 'owner')
+        fields = ( User.USERNAME_FIELD , 'full_name' ,'password', 'is_active' , 'email' , 'owner' , 'first_name' , 'last_name')
+        #TODO : password update handling and first and last name
         extra_kwargs = {
-            'password' : {'write_only' : True}
+            'password' : {'write_only' : True ,},
+            'first_name' : {'write_only' : True},
+            'last_name' : {'write_only' : True},
         }
     
     def create(self , validation_data):
         user = User.objects.create_user(**validation_data)
         return user
-    
+    #TODO : password update routine ?!!!
     def update(self , instance , validation_data):
         if 'password' in validation_data:
             password = validation_data.pop('password')
@@ -55,12 +68,36 @@ class DoctorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Doctor
-        fields = ('user' , 'nationalId' , 'medicalCouncilId' , 'owner')
+        fields = ('user' , 'nationalId' , 'medicalCouncilId' , 'owner' ,'avatar')
 #TODO : no post
+
+#TODO : only the user login for itself can post or update or get 
 class TreatmentSerializer(serializers.ModelSerializer):
-    patient = serializers.SlugRelatedField(slug_field='username' , queryset = Patient.objects.all())
-    doctor = serializers.SlugRelatedField(slug_field='username' , queryset = Doctor.objects.all())
+    
+    patientUsername = serializers.ReadOnlyField(source= 'patient.user.username')
+    doctorUsername = serializers.ReadOnlyField(source = 'doctor.user.username' )
+    
 
     class Meta:
         model = Treatment
-        fields = ('patient' , 'doctor' , 'status' , 'subject')
+        fields = ("id",'patient' , 'doctor' , 'status' , 'subject' , 'patientUsername' , 'doctorUsername')
+        extra_kwargs = {
+            'patient' : {'write_only' : True},
+            'doctor' : {'write_only' : True}
+        }
+
+#TODO : or with slugrealted field ?
+class MessageSerializer(serializers.ModelSerializer):
+
+    senderUsername = serializers.ReadOnlyField(source = 'sender.username')
+    receiverUsername = serializers.ReadOnlyField(source = 'receiver.username')
+    senderName = serializers.ReadOnlyField(source = 'sender.get_full_name')
+    receiverName = serializers.ReadOnlyField(source = 'receiver.get_full_name')
+
+    class Meta:
+        model = Message
+        fields = ('id','sender' , 'receiver' , 'text' , 'senderUsername' , 'senderName' , 'receiverUsername' , 'receiverName')
+        extra_kwargs = {
+            'sender' : {'write_only' : True },
+            'receiver' : {'write_only' : True}
+        }
