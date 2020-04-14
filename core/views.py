@@ -19,6 +19,10 @@ from django.db.models import Value as V
 from django.db.models.functions import Concat
 from rest_framework.response import Response
 
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
+
+
 User = get_user_model()
 
 
@@ -111,10 +115,24 @@ class FollowerViewSet(DefaultsMixin , viewsets.ModelViewSet):
             qs = qs.filter(follower__username = follower)
 
         return qs
-    
 
 
 
-
+class CustomObtainAuthToken(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        response = super(CustomObtainAuthToken, self).post(request, *args, **kwargs)
+        token = Token.objects.get(key=response.data['token'])
+        data = User.objects.get(username=request.POST.get('username'))
+        serializer= UserSerializer(data)
+        qsp = Patient.objects.filter(user = data)
+        qsd = Doctor.objects.filter(user = data)
+        typeDetail = 'patient'
+        if(len(qsp)>0):
+            serializerDetail = PatientSerializer(qsp[0])
+            typeDetail = 'patient'
+        else:
+            serializerDetail = DoctorSerializer(qsd[0])
+            typeDetail = 'doctor'
+        return Response({'token': token.key, 'type':typeDetail, 'user': serializer.data , 'detail' : serializerDetail.data})
 
 

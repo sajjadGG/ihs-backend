@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+#TODO : module from other app should not be here
 from django.contrib import admin
 from django.urls import path , include 
 from rest_framework.authtoken.views import obtain_auth_token
@@ -20,7 +21,7 @@ from core.urls import router
 
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import CustomObtainAuthToken
+from core.views import CustomObtainAuthToken
 
 #path(r'api/token/' , include('rest_framework.urls') , name='api-token')
 

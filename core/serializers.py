@@ -9,9 +9,8 @@ from django.utils.translation import ugettext_lazy as _
 User = get_user_model()
 
 #TODO :  define owner for all serialize based on who can change it
-class UserSerializerPut(serializers.ModelSerializer):
-    pass
 class UserSerializer(serializers.ModelSerializer):
+    #TODO : not good idea
     def __init__(self, *args, **kwargs):
         kwargs['partial'] = True
         super(UserSerializer, self).__init__(*args, **kwargs)
@@ -84,7 +83,7 @@ class DoctorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Doctor
-        fields = ('user' , 'nationalId' , 'medicalCouncilId' , 'owner' ,'avatar' , 'userfullname' , 'userId')
+        fields = ('user' , 'nationalId' , 'medicalCouncilId' , 'owner' ,'avatar' , 'userfullname' , 'userId' , 'speciality')
         read_only_fields = ['userfullname' , 'userId']
 #TODO : no post
 
