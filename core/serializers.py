@@ -59,13 +59,13 @@ class PatientSerializer(serializers.ModelSerializer):
     queryset = User.objects.all())
     useremail = serializers.CharField(source = 'user.email' , read_only = True)
     userfullname = serializers.CharField(source = 'user.get_full_name' , read_only = True)
-
+    userId = serializers.CharField(source = 'user.id' , read_only = True)
 
     class Meta:
         model = Patient
         fields = ('user' , 'nationalId' , 'diseaseHistory' , 
-        'insurance' , 'supplementalInsurance' , 'weight' , 'height'  , 'owner' ,'avatar' , 'phone_number' , 'useremail' , 'userfullname')
-        read_only_fields = ('useremail' , 'userfullname')
+        'insurance' , 'supplementalInsurance' , 'weight' , 'height'  , 'owner' ,'avatar' , 'phone_number' , 'useremail' , 'userfullname' , 'userId')
+        read_only_fields = ('useremail' , 'userfullname' , 'userId')
 
     
 
@@ -75,10 +75,12 @@ class DoctorSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
     queryset = User.objects.all())
     userfullname = serializers.CharField(source = 'user.get_full_name' , read_only = True)
+    userId = serializers.CharField(source = 'user.id' , read_only = True)
+
     class Meta:
         model = Doctor
-        fields = ('user' , 'nationalId' , 'medicalCouncilId' , 'owner' ,'avatar' , 'userfullname')
-        read_only_fields = ['userfullname']
+        fields = ('user' , 'nationalId' , 'medicalCouncilId' , 'owner' ,'avatar' , 'userfullname' , 'userId')
+        read_only_fields = ['userfullname' , 'userId']
 #TODO : no post
 
 #TODO : only the user login for itself can post or update or get 
