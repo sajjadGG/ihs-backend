@@ -10,33 +10,6 @@ User = get_user_model()
 
 #TODO :  define owner for all serialize based on who can change it
 
-class FollowerSerializer(serializers.ModelSerializer):
-    followee = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
-    queryset = User.objects.all())
-    follower = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
-    queryset = User.objects.all())
-    class Meta:
-        model = Follower
-        fields = ('id' , 'followee' , 'follower' )
-
-class InsuranceSerializer(serializers.ModelSerializer):
-    
-    class Meta:
-        model = Insurance
-        fields = ('id','orgname',)
-        
-class PatientSerializer(serializers.ModelSerializer):
-    owner = serializers.ReadOnlyField(source = 'user.username')
-    user = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
-    queryset = User.objects.all())
-
-
-    class Meta:
-        model = Patient
-        fields = ('user' , 'nationalId' , 'diseaseHistory' , 
-        'insurance' , 'supplementalInsurance' , 'weight' , 'height'  , 'owner' ,'avatar' , 'phone_number')
-
-    
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source = 'get_full_name' , read_only=True)
     owner = serializers.ReadOnlyField(source = 'username')
@@ -61,14 +34,51 @@ class UserSerializer(serializers.ModelSerializer):
         return super(UserSerializer , self).update(instance , validation_data)
 
 
+
+class FollowerSerializer(serializers.ModelSerializer):
+    followee = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
+    queryset = User.objects.all())
+    follower = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
+    queryset = User.objects.all() ,default=serializers.CurrentUserDefault())
+    class Meta:
+        model = Follower
+        fields = ('id' , 'followee' , 'follower' )
+
+class InsuranceSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Insurance
+        fields = ('id','orgname',)
+
+
+
+        
+class PatientSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source = 'user.username')
+    user = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
+    queryset = User.objects.all())
+    useremail = serializers.CharField(source = 'user.email' , read_only = True)
+    userfullname = serializers.CharField(source = 'user.get_full_name' , read_only = True)
+
+
+    class Meta:
+        model = Patient
+        fields = ('user' , 'nationalId' , 'diseaseHistory' , 
+        'insurance' , 'supplementalInsurance' , 'weight' , 'height'  , 'owner' ,'avatar' , 'phone_number' , 'useremail' , 'userfullname')
+        read_only_fields = ('useremail' , 'userfullname')
+
+    
+
+
 class DoctorSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source = 'user.username')
     user = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
     queryset = User.objects.all())
-
+    userfullname = serializers.CharField(source = 'user.get_full_name' , read_only = True)
     class Meta:
         model = Doctor
-        fields = ('user' , 'nationalId' , 'medicalCouncilId' , 'owner' ,'avatar')
+        fields = ('user' , 'nationalId' , 'medicalCouncilId' , 'owner' ,'avatar' , 'userfullname')
+        read_only_fields = ['userfullname']
 #TODO : no post
 
 #TODO : only the user login for itself can post or update or get 

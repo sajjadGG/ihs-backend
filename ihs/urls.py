@@ -20,12 +20,12 @@ from core.urls import router
 
 from django.conf import settings
 from django.conf.urls.static import static
-
+from .views import CustomObtainAuthToken
 
 #path(r'api/token/' , include('rest_framework.urls') , name='api-token')
 
 urlpatterns = [
-    path(r'api/token/' , obtain_auth_token , name='api-token'),
+    path(r'api/token/' , CustomObtainAuthToken.as_view() , name='api-token'),
     path(r'api/login/', include('rest_framework.urls')),
     path(r'api/' , include(router.urls)),
 ]

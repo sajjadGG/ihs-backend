@@ -74,11 +74,13 @@ class DoctorViewSet(OwnerMixin , viewsets.ModelViewSet):
     queryset = Doctor.objects.all()
     serializer_class = DoctorSerializer
     def get_queryset(self):
-        qs = Patient.objects.all()
+        qs = Doctor.objects.all()
         query = self.request.GET.get('name')
         if query is not None:
             #TODO : test for persian 
+            print(query)
             qs = Doctor.objects.annotate(full_name = Concat('user__first_name' , V(' ') , 'user__last_name') ).filter(full_name__icontains = query)
+            print(qs)
         return qs
 
 

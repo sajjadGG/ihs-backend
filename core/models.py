@@ -55,6 +55,9 @@ class Follower(models.Model):
     def __str__(self):
         return str(self.user)
 
+    class Meta:
+        unique_together = ('follower' , 'followee')
+
 
 class Treatment(models.Model):
     TREATMENT_STATUS = (
