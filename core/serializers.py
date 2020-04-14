@@ -9,16 +9,21 @@ from django.utils.translation import ugettext_lazy as _
 User = get_user_model()
 
 #TODO :  define owner for all serialize based on who can change it
-
+class UserSerializerPut(serializers.ModelSerializer):
+    pass
 class UserSerializer(serializers.ModelSerializer):
+    def __init__(self, *args, **kwargs):
+        kwargs['partial'] = True
+        super(UserSerializer, self).__init__(*args, **kwargs)
+
     full_name = serializers.CharField(source = 'get_full_name' , read_only=True)
     owner = serializers.ReadOnlyField(source = 'username')
     class Meta:
         model = User
-        fields = ( User.USERNAME_FIELD , 'full_name' ,'password', 'is_active' , 'email' , 'owner' , 'first_name' , 'last_name')
+        fields = ( 'username' , 'full_name' ,'password', 'is_active' , 'email' , 'owner' , 'first_name' , 'last_name')
         #TODO : password update handling and first and last name
         extra_kwargs = {
-            'password' : {'write_only' : True ,},
+            'password' : {'write_only' : True },
             'first_name' : {'write_only' : True},
             'last_name' : {'write_only' : True},
         }

@@ -1,4 +1,4 @@
-from rest_framework import viewsets , authentication , permissions
+from rest_framework import authentication, permissions, status, viewsets
 
 from django.contrib.auth import get_user_model
 
@@ -17,6 +17,7 @@ from .mixins import DefaultsMixin, OwnerMixin
 
 from django.db.models import Value as V
 from django.db.models.functions import Concat
+from rest_framework.response import Response
 
 User = get_user_model()
 
@@ -66,7 +67,8 @@ class UserViewSet(DefaultsMixin , viewsets.ModelViewSet):
         if self.request.method =='POST':
             self.permission_classes = (permissions.AllowAny,)
         return super(UserViewSet , self).get_permissions()
-            
+
+   
     
 
 class DoctorViewSet(OwnerMixin , viewsets.ModelViewSet):
