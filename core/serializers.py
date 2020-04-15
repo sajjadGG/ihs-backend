@@ -17,18 +17,27 @@ class UserSerializer(serializers.ModelSerializer):
 
     full_name = serializers.CharField(source = 'get_full_name' , read_only=True)
     owner = serializers.ReadOnlyField(source = 'username')
+    userType =  serializers.CharField(write_only=True)
+    
     class Meta:
         model = User
-        fields = ( 'username' , 'full_name' ,'password', 'is_active' , 'email' , 'owner' , 'first_name' , 'last_name')
+        fields = ( 'username' , 'full_name' ,'password', 'is_active' , 'email' , 'owner' , 'first_name' , 'last_name' , 'userType')
         #TODO : password update handling and first and last name
         extra_kwargs = {
             'password' : {'write_only' : True },
             'first_name' : {'write_only' : True},
             'last_name' : {'write_only' : True},
+            'type' : {'write_only' : True}
         }
     
     def create(self , validation_data):
+        t = validation_data.pop('userType')
         user = User.objects.create_user(**validation_data)
+        r = None
+        if(t == 'doctor'):
+            r = Doctor.objects.create(user = user)
+        else:
+            r = Patient.objects.create(user = user)
         return user
     #TODO : password update routine ?!!!
     def update(self , instance , validation_data):
@@ -110,9 +119,14 @@ class MessageSerializer(serializers.ModelSerializer):
     senderName = serializers.ReadOnlyField(source = 'sender.get_full_name')
     receiverName = serializers.ReadOnlyField(source = 'receiver.get_full_name')
 
+    sender = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
+    queryset = User.objects.all())
+    receiver = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
+    queryset = User.objects.all())
+
     class Meta:
         model = Message
-        fields = ('id','sender' , 'receiver' , 'text' , 'senderUsername' , 'senderName' , 'receiverUsername' , 'receiverName')
+        fields = ('id','sender' , 'receiver'  , 'text' , 'senderUsername' , 'senderName' , 'receiverUsername' , 'receiverName' ,'time_updated' , 'time_created' )
         extra_kwargs = {
             'sender' : {'write_only' : True },
             'receiver' : {'write_only' : True}

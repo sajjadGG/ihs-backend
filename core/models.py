@@ -20,7 +20,7 @@ class Patient(models.Model):
     avatar = models.ImageField(upload_to = upload_avatar_image , null=True , blank=True)
     nationalId = models.CharField(max_length=63 , blank=True) # TODO : natioanl id unique
     diseaseHistory = models.CharField(max_length = 255 , blank = True , default = '')
-    phone_number = models.CharField(max_length=15) #TODO : here or in episode and also validation
+    phone_number = models.CharField(max_length=15 , blank=True) #TODO : here or in episode and also validation
     insurance = models.ForeignKey(Insurance , on_delete=models.CASCADE , blank=True , null=True,related_name='patinet_insurance_set') #TODO : insurance id 0 must be defined for no insurance
     supplementalInsurance = models.ForeignKey(Insurance , on_delete=models.CASCADE , blank=True ,null=True, related_name='patinet_supplemental_set')#TODO :  insurance id 1 must be defined for no supplemental insurance
     weight = models.DecimalField(blank=True ,null=True, decimal_places=3 , max_digits=7)

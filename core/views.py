@@ -22,6 +22,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 
+from django.db.models import Q
 
 User = get_user_model()
 
@@ -98,6 +99,20 @@ class TreatmentViewSet(DefaultsMixin , viewsets.ModelViewSet):
 class MessageViewSet(DefaultsMixin , viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
+
+    def get_queryset(self):
+        qs = Message.objects.all()
+        sender = self.request.GET.get('sender')
+        receiver = self.request.GET.get('receiver')
+        if sender is not None and receiver is not None:
+            qs = qs.filter(Q(sender__username = sender ,receiver__username = receiver) | Q(sender__username = receiver , receiver__username = sender)) 
+        elif sender is not None:
+            qs = qs.filter(sender__username = sender)
+        elif receiver is not None:
+            qs = qs.filter(receiver__username = receiver)
+
+        return qs.order_by('time_created')
+
 
 class FollowerViewSet(DefaultsMixin , viewsets.ModelViewSet):
     queryset = Follower.objects.all()
