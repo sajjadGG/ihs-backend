@@ -1,6 +1,8 @@
 from rest_framework import authentication, permissions, status, viewsets
 
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
+from django.conf import settings
 
 from .models import Insurance ,Patient , Doctor , Treatment , Message , Follower
 from .serializers import (
@@ -73,6 +75,12 @@ class UserViewSet(DefaultsMixin , viewsets.ModelViewSet):
             self.permission_classes = (permissions.AllowAny,)
         return super(UserViewSet , self).get_permissions()
 
+    def send_email(self):
+        subject = 'Welcome to ihs'
+        message = "To complete your registration, you should confirm your email. \n You just need to click link below: \n  'URL'"
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = [str(self.queryset["email"])]
+        send_mail( subject, message, email_from, recipient_list )
    
     
 
