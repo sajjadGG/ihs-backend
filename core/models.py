@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
+
 # Create your models here.
 User = get_user_model()
 
@@ -140,3 +141,52 @@ class Message(models.Model):
     text = models.CharField(max_length = 1023)
     time_created = models.DateTimeField(auto_now_add=True)
     time_updated = models.DateTimeField(auto_now=True)
+
+
+#TODO : thinking about treatment , Episode , Appointment 
+#TODO : Clinic?
+#TODO : location
+class Clinic(models.Model):
+    name = models.CharField(max_length=127)
+    description = models.CharField(max_length=1023)
+    city = models.CharField(max_length=64)
+    address = models.CharField(max_length=1023)
+    #location = models.PointField() #pair of longitude and latitude coordinates
+    #TODO : PointField ?!
+    longitude = models.DecimalField(max_digits=9, decimal_places=6)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6)
+
+class ClinicDoctor(models.Model):
+    doctor = models.ForeignKey(Doctor , on_delete=models.CASCADE)
+    clinic = models.ForeignKey(Clinic , on_delete=models.CASCADE)
+
+    def clinics(self ,doctor):
+        """return all the clinics associated with particular doctor"""
+        return Follower.objects.filter(doctor=doctor)
+
+    def doctors(self , clinic):
+        """return all the doctor associated with particular clinic"""
+        followers_list = Follower.object.filter(clinic = clinic)
+
+
+    class Meta:
+        unique_together = ('doctor' , 'clinic')
+#TODO : set on doctor or clinic ?
+class Appointment(models.Model):
+
+    STATUS = (
+        ('O' , _('Open')),
+        ('R' , _('Reserved')),
+        ('C' , _('Completed')),
+    )
+
+    clinic_doctor = models.ForeignKey(ClinicDoctor , on_delete=models.CASCADE)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    status = models.CharField(max_length=1,choices=STATUS , default = 'O')
+    patient = models.ForeignKey(Patient , on_delete=models.CASCADE , null=True , blank=True)
+
+
+
+
+
