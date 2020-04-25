@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
-from .models import Insurance , Patient , Doctor , Treatment , Message , Follower
+from .models import Insurance , Patient , Doctor , Treatment , Message , Follower, Clinic, Appointment, ClinicDoctor
 
 from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
@@ -131,3 +131,30 @@ class MessageSerializer(serializers.ModelSerializer):
             'sender' : {'write_only' : True },
             'receiver' : {'write_only' : True}
         }
+
+
+
+class ClinicSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Clinic
+        fields = ['name', 'description', 'city', 'address', 'longitude', 'latitude']
+
+
+
+class ClinicDoctorSerializer(serializers.ModelSerializer):
+    clinicName = serializers.ReadOnlyField(source = 'clinic.name')
+    doctorUsername = serializers.ReadOnlyField(source = 'doctor.user.username')
+
+    class Meta:
+        model = ClinicDoctor
+        fields = ['clinic', 'doctor', 'clinicName', 'doctorUsername']
+
+class AppointmentSerializer(serializers.ModelSerializer):
+    #clinicDoctorName = serializers.ReadOnlyField(source = 'clinic_doctor.')  #TODO : Which field or attribute of clinicDoctor is needed?
+    patientUsername = serializers.ReadOnlyField(source = 'patient.user.username')
+
+    class Meta:
+        model = Appointment
+        fields = ['clinic_doctor', 'start_time', 'end_time', 'status', 'patient', 'patientUsername']  #TODO : clinicDoctorName must be added
+

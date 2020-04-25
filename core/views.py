@@ -2,7 +2,7 @@ from rest_framework import authentication, permissions, status, viewsets
 
 from django.contrib.auth import get_user_model
 
-from .models import Insurance ,Patient , Doctor , Treatment , Message , Follower
+from .models import Insurance ,Patient , Doctor , Treatment , Message , Follower, Clinic, ClinicDoctor, Appointment
 from .serializers import (
     InsuranceSerializer , 
     PatientSerializer , 
@@ -10,7 +10,10 @@ from .serializers import (
     DoctorSerializer , 
     TreatmentSerializer , 
     MessageSerializer , 
-    FollowerSerializer)
+    FollowerSerializer, 
+    ClinicSerializer,
+    ClinicDoctorSerializer,
+    AppointmentSerializer,)
 
 from .mixins import DefaultsMixin, OwnerMixin
 
@@ -73,6 +76,10 @@ class UserViewSet(DefaultsMixin , viewsets.ModelViewSet):
             self.permission_classes = (permissions.AllowAny,)
         return super(UserViewSet , self).get_permissions()
 
+<<<<<<< Updated upstream
+=======
+    
+>>>>>>> Stashed changes
    
     
 
@@ -151,3 +158,25 @@ class CustomObtainAuthToken(ObtainAuthToken):
         return Response({'token': token.key, 'type':typeDetail, 'user': serializer.data , 'detail' : serializerDetail.data})
 
 
+# class EmailViewSet(DefaultsMixin , viewsets.ModelViewSet):
+#     def post(self, request):
+#         subject = 'Welcome to ihs'
+#         message = "To complete your registration, you should confirm your email. \n You just need to click link below: \n  'URL'"
+#         email_from = settings.EMAIL_HOST_USER
+#         recipient_list = [str(self.queryset["email"])]
+#         send_mail( subject, message, email_from, recipient_list )
+
+
+class ClinicViewSet(DefaultsMixin, viewsets.ModelViewSet):
+    queryset = Clinic.objects.all()
+    serializer_class = ClinicSerializer
+
+
+class ClinicDoctorViewSet(OwnerMixin, viewsets.ModelViewSet):
+    queryset = ClinicDoctor.objects.all()
+    serializer_class = ClinicDoctorSerializer
+
+
+class AppointmentViewSet(DefaultsMixin, viewsets.ModelViewSet):
+    queryset = Appointment.objects.all()
+    serializer_class = AppointmentSerializer

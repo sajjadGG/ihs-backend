@@ -156,6 +156,10 @@ class Clinic(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
 
+    def __str__(self):
+        return self.name
+
+
 class ClinicDoctor(models.Model):
     doctor = models.ForeignKey(Doctor , on_delete=models.CASCADE)
     clinic = models.ForeignKey(Clinic , on_delete=models.CASCADE)
@@ -171,6 +175,8 @@ class ClinicDoctor(models.Model):
 
     class Meta:
         unique_together = ('doctor' , 'clinic')
+
+
 #TODO : set on doctor or clinic ?
 class Appointment(models.Model):
 
