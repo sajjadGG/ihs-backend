@@ -76,10 +76,7 @@ class UserViewSet(DefaultsMixin , viewsets.ModelViewSet):
             self.permission_classes = (permissions.AllowAny,)
         return super(UserViewSet , self).get_permissions()
 
-<<<<<<< Updated upstream
-=======
     
->>>>>>> Stashed changes
    
     
 
