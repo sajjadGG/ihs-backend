@@ -96,53 +96,6 @@ class Episode(models.Model):
     status = models.CharField(max_length=1 , choices = EPISODE_STATUS , default = 'R')
     treatment = models.ForeignKey(Treatment , on_delete=models.CASCADE) #TODO : default to new treatment (or handle it in some other manner)
 
-#TODO : shall we also save cumulative score on user ?
-class Review(models.Model):
-    QUALITY = (
-        (1 , _('VeryPoor')),
-        (2 , _('Poor')),
-        (3, _('Fair')),
-        (4  , _('Good')),
-        (5,_('Excellent')),
-
-    )
-
-    reviewer = models.ForeignKey(User , on_delete=models.CASCADE , related_name='reviewer_set') #TODO : annonymous review
-    reviewee = models.ForeignKey(User , on_delete=models.CASCADE , related_name = 'reveiwee_set')
-    text = models.CharField(max_length=1023)
-    rating = models.IntegerField(choices=QUALITY)
-    treatment = models.ForeignKey(Treatment , on_delete=models.CASCADE , blank=True , null=True)
-    episode = models.ForeignKey(Episode , on_delete=models.CASCADE , blank=True , null=True)#TODO : chekc wheter this episode is in treatment specified or with right doctor
-
-class Medicine(models.Model):
-    #TODO : populate with standardized field
-    name = models.CharField(max_length=127)
-    
-#TODO : rethink our reminder implementation
-class MedReminder(models.Model):
-    """ an abstract reminder for all the other reminders"""
-    STATUS = (
-        ('A' , _('Active')),
-        ('I' , _('Inactive')),
-    )
-    
-    medicine = models.ForeignKey(Medicine , on_delete=models.CASCADE) #TODO :  add new Medicine 
-    patient =  models.ForeignKey(Patient , on_delete=models.CASCADE)
-    status = models.CharField(max_length=1,choices=STATUS)
-    
-class PeriodicReminder(models.Model):
-    reminder = models.ForeignKey(MedReminder , on_delete=models.CASCADE) #TODO : check only one active reminder per med , patient
-    period = models.DecimalField(max_digits=4 , decimal_places=2)
-    starttime = models.DateTimeField()
-
-class Message(models.Model):
-    sender = models.ForeignKey(User , on_delete = models.CASCADE , related_name = "sender_set")
-    receiver = models.ForeignKey(User , on_delete = models.CASCADE  , related_name = "receiver_set")
-    text = models.CharField(max_length = 1023)
-    time_created = models.DateTimeField(auto_now_add=True)
-    time_updated = models.DateTimeField(auto_now=True)
-
-
 #TODO : thinking about treatment , Episode , Appointment 
 #TODO : Clinic?
 #TODO : location
@@ -177,6 +130,7 @@ class ClinicDoctor(models.Model):
         unique_together = ('doctor' , 'clinic')
 
 
+
 #TODO : set on doctor or clinic ?
 class Appointment(models.Model):
 
@@ -191,6 +145,58 @@ class Appointment(models.Model):
     end_time = models.DateTimeField()
     status = models.CharField(max_length=1,choices=STATUS , default = 'O')
     patient = models.ForeignKey(Patient , on_delete=models.CASCADE , null=True , blank=True)
+
+
+#TODO : shall we also save cumulative score on user ?
+class Review(models.Model):
+    QUALITY = (
+        (1 , _('VeryPoor')),
+        (2 , _('Poor')),
+        (3, _('Fair')),
+        (4  , _('Good')),
+        (5,_('Excellent')),
+
+    )
+
+    reviewer = models.ForeignKey(User , on_delete=models.CASCADE , related_name='reviewer_set') #TODO : annonymous review
+    reviewee = models.ForeignKey(User , on_delete=models.CASCADE , related_name = 'reveiwee_set')
+    text = models.CharField(max_length=1023 , blank=True , null=True)
+    rating = models.IntegerField(choices=QUALITY)
+    treatment = models.ForeignKey(Treatment , on_delete=models.CASCADE , blank=True , null=True)
+    episode = models.ForeignKey(Episode , on_delete=models.CASCADE , blank=True , null=True)#TODO : chekc wheter this episode is in treatment specified or with right doctor
+    appointment = models.ForeignKey(Appointment , on_delete=models.CASCADE , blank=True , null=True)
+
+class Medicine(models.Model):
+    #TODO : populate with standardized field
+    name = models.CharField(max_length=127)
+    
+#TODO : rethink our reminder implementation
+class MedReminder(models.Model):
+    """ an abstract reminder for all the other reminders"""
+    STATUS = (
+        ('A' , _('Active')),
+        ('I' , _('Inactive')),
+    )
+    
+    medicine = models.ForeignKey(Medicine , on_delete=models.CASCADE) #TODO :  add new Medicine 
+    patient =  models.ForeignKey(Patient , on_delete=models.CASCADE)
+    status = models.CharField(max_length=1,choices=STATUS)
+    
+class PeriodicReminder(models.Model):
+    reminder = models.ForeignKey(MedReminder , on_delete=models.CASCADE) #TODO : check only one active reminder per med , patient
+    period = models.DecimalField(max_digits=4 , decimal_places=2)
+    starttime = models.DateTimeField()
+
+class Message(models.Model):
+    sender = models.ForeignKey(User , on_delete = models.CASCADE , related_name = "sender_set")
+    receiver = models.ForeignKey(User , on_delete = models.CASCADE  , related_name = "receiver_set")
+    text = models.CharField(max_length = 1023)
+    time_created = models.DateTimeField(auto_now_add=True)
+    time_updated = models.DateTimeField(auto_now=True)
+
+
+
+
 
 
 
