@@ -2,7 +2,7 @@ from rest_framework import authentication, permissions, status, viewsets
 
 from django.contrib.auth import get_user_model
 
-from .models import Insurance ,Patient , Doctor , Treatment , Message , Follower, Clinic, ClinicDoctor, Appointment
+from .models import Insurance ,Patient , Doctor , Treatment , Message , Follower, Clinic, ClinicDoctor, Appointment , Review
 from .serializers import (
     InsuranceSerializer , 
     PatientSerializer , 
@@ -13,8 +13,13 @@ from .serializers import (
     FollowerSerializer, 
     ClinicSerializer,
     ClinicDoctorSerializer,
+<<<<<<< HEAD
     DoctorAppointmentSerializer,
     PatientAppointmentSerializer,)
+=======
+    AppointmentSerializer,
+    ReviewSerializer,)
+>>>>>>> 9cf0aa0498365333a83de84aab54746df2e817d4
 
 from .mixins import DefaultsMixin, OwnerMixin
 
@@ -174,6 +179,7 @@ class ClinicDoctorViewSet(OwnerMixin, viewsets.ModelViewSet):
 
 class AppointmentViewSet(DefaultsMixin, viewsets.ModelViewSet):
     queryset = Appointment.objects.all()
+<<<<<<< HEAD
     doctor_serializer = DoctorAppointmentSerializer
     patient_serializer = PatientAppointmentSerializer
 
@@ -183,3 +189,10 @@ class AppointmentViewSet(DefaultsMixin, viewsets.ModelViewSet):
             return self.doctor_serializer
         else:
             return self.patient_serializer
+=======
+    serializer_class = AppointmentSerializer
+
+class ReviewViewSet(DefaultsMixin , viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+>>>>>>> 9cf0aa0498365333a83de84aab54746df2e817d4

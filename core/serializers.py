@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
-from .models import Insurance , Patient , Doctor , Treatment , Message , Follower, Clinic, Appointment, ClinicDoctor
+from .models import Insurance , Patient , Doctor , Treatment , Message , Follower, Clinic, Appointment, ClinicDoctor , Review
 
 from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
@@ -162,6 +162,7 @@ class DoctorAppointmentSerializer(serializers.ModelSerializer):
         }
 
 
+<<<<<<< HEAD
 class PatientAppointmentSerializer(serializers.ModelSerializer):
     clinicDoctorID = serializers.ReadOnlyField(source = 'clinic_doctor.id')  #TODO : Which field or attribute of clinicDoctor is needed?
     patientUsername = serializers.ReadOnlyField(source = 'patient.user.username')
@@ -173,3 +174,11 @@ class PatientAppointmentSerializer(serializers.ModelSerializer):
             'patient': {'write_only': True},
             'clinic_doctor': {'write_only': True},
         }
+=======
+#TODO : restrict reviewer and reviewee to patient and doctor
+class ReviewSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Review
+        fields = ['reviewer' , 'reviewee' , 'text' , 'rating' , 'appointment']
+>>>>>>> 9cf0aa0498365333a83de84aab54746df2e817d4
