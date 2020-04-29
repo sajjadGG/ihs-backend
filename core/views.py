@@ -13,7 +13,8 @@ from .serializers import (
     FollowerSerializer, 
     ClinicSerializer,
     ClinicDoctorSerializer,
-    DoctorAppointmentSerializer,)
+    DoctorAppointmentSerializer,
+    PatientAppointmentSerializer,)
 
 from .mixins import DefaultsMixin, OwnerMixin
 
@@ -76,13 +77,6 @@ class UserViewSet(DefaultsMixin , viewsets.ModelViewSet):
             self.permission_classes = (permissions.AllowAny,)
         return super(UserViewSet , self).get_permissions()
 
-<<<<<<< HEAD
-     
-=======
-    
-   
->>>>>>> 6ae7e8909bda6c55759cfff8dcfae9d0f1b61cea
-    
 
 class DoctorViewSet(OwnerMixin , viewsets.ModelViewSet):
     lookup_field = 'user__username'
@@ -180,18 +174,12 @@ class ClinicDoctorViewSet(OwnerMixin, viewsets.ModelViewSet):
 
 class AppointmentViewSet(DefaultsMixin, viewsets.ModelViewSet):
     queryset = Appointment.objects.all()
-    serializer_class = DoctorAppointmentSerializer
+    doctor_serializer = DoctorAppointmentSerializer
+    patient_serializer = PatientAppointmentSerializer
 
-    # def post(self):
-    #     username = self.request.user.username
-    #     doctors = Doctor.objects.all()
-    #     patients = Patient.objects.all()
-    #     is_doctor = False
-    #     for user in doctors.keys():
-
-
-    # def get_queryset(self):
-    #     starttime = self.request.GET.get('start_time')
-    #     endtime = self.request.GET.get('end_time')
-    #     filtered = Appointment.objects.filter(start_time__gte = starttime, end_time__lte = endtime, status = 'open')
-    #     return filtered
+    def get_serializer_class(self):
+        doctors = Doctor.objects.get(user = self.request.user)
+        if doctors is not None:
+            return self.doctor_serializer
+        else:
+            return self.patient_serializer
