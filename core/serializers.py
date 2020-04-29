@@ -145,7 +145,7 @@ class ClinicSerializer(serializers.ModelSerializer):
 class ClinicDoctorSerializer(serializers.ModelSerializer):
     clinicName = serializers.ReadOnlyField(source = 'clinic.name')
     doctorUsername = serializers.ReadOnlyField(source = 'doctor.user.username')
-
+    
     class Meta:
         model = ClinicDoctor
         fields = ['clinic', 'doctor', 'clinicName', 'doctorUsername']

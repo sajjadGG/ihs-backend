@@ -76,7 +76,12 @@ class UserViewSet(DefaultsMixin , viewsets.ModelViewSet):
             self.permission_classes = (permissions.AllowAny,)
         return super(UserViewSet , self).get_permissions()
 
+<<<<<<< HEAD
      
+=======
+    
+   
+>>>>>>> 6ae7e8909bda6c55759cfff8dcfae9d0f1b61cea
     
 
 class DoctorViewSet(OwnerMixin , viewsets.ModelViewSet):
