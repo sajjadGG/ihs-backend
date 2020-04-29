@@ -150,11 +150,26 @@ class ClinicDoctorSerializer(serializers.ModelSerializer):
         model = ClinicDoctor
         fields = ['clinic', 'doctor', 'clinicName', 'doctorUsername']
 
-class AppointmentSerializer(serializers.ModelSerializer):
-    #clinicDoctorName = serializers.ReadOnlyField(source = 'clinic_doctor.')  #TODO : Which field or attribute of clinicDoctor is needed?
-    patientUsername = serializers.ReadOnlyField(source = 'patient.user.username')
 
+class DoctorAppointmentSerializer(serializers.ModelSerializer):
+    clinicDoctorID = serializers.ReadOnlyField(source = 'clinic_doctor.id')  #TODO : Which field or attribute of clinicDoctor is needed?
+    
     class Meta:
         model = Appointment
-        fields = ['clinic_doctor', 'start_time', 'end_time', 'status', 'patient', 'patientUsername']  #TODO : clinicDoctorName must be added
+        fields = ['clinic_doctor', 'start_time', 'end_time', 'status', 'clinicDoctorID']  #TODO : clinicDoctorName must be added
+        extra_kwargs = {
+            'clinic_doctor': {'write_only': True},
+        }
 
+
+class PatientAppointmentSerializer(serializers.ModelSerializer):
+    clinicDoctorID = serializers.ReadOnlyField(source = 'clinic_doctor.id')  #TODO : Which field or attribute of clinicDoctor is needed?
+    patientUsername = serializers.ReadOnlyField(source = 'patient.user.username')
+    
+    class Meta:
+        model = Appointment
+        fields = ['clinic_doctor', 'patient', 'start_time', 'end_time', 'status', 'patientUsername', 'clinicDoctorID']  #TODO : clinicDoctorName must be added
+        extra_kwargs = {
+            'patient': {'write_only': True},
+            'clinic_doctor': {'write_only': True},
+        }

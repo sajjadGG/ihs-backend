@@ -13,7 +13,7 @@ from .serializers import (
     FollowerSerializer, 
     ClinicSerializer,
     ClinicDoctorSerializer,
-    AppointmentSerializer,)
+    DoctorAppointmentSerializer,)
 
 from .mixins import DefaultsMixin, OwnerMixin
 
@@ -76,11 +76,7 @@ class UserViewSet(DefaultsMixin , viewsets.ModelViewSet):
             self.permission_classes = (permissions.AllowAny,)
         return super(UserViewSet , self).get_permissions()
 
-<<<<<<< Updated upstream
-=======
-    
->>>>>>> Stashed changes
-   
+     
     
 
 class DoctorViewSet(OwnerMixin , viewsets.ModelViewSet):
@@ -179,4 +175,18 @@ class ClinicDoctorViewSet(OwnerMixin, viewsets.ModelViewSet):
 
 class AppointmentViewSet(DefaultsMixin, viewsets.ModelViewSet):
     queryset = Appointment.objects.all()
-    serializer_class = AppointmentSerializer
+    serializer_class = DoctorAppointmentSerializer
+
+    # def post(self):
+    #     username = self.request.user.username
+    #     doctors = Doctor.objects.all()
+    #     patients = Patient.objects.all()
+    #     is_doctor = False
+    #     for user in doctors.keys():
+
+
+    # def get_queryset(self):
+    #     starttime = self.request.GET.get('start_time')
+    #     endtime = self.request.GET.get('end_time')
+    #     filtered = Appointment.objects.filter(start_time__gte = starttime, end_time__lte = endtime, status = 'open')
+    #     return filtered
