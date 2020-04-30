@@ -175,7 +175,10 @@ class PatientAppointmentSerializer(serializers.ModelSerializer):
         }
 #TODO : restrict reviewer and reviewee to patient and doctor
 class ReviewSerializer(serializers.ModelSerializer):
-    
+    reviewer = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
+    queryset = User.objects.all())
+    reviewee = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
+    queryset = User.objects.all())
     class Meta:
         model = Review
         fields = ['reviewer' , 'reviewee' , 'text' , 'rating' , 'appointment']
