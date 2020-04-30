@@ -179,15 +179,10 @@ class AppointmentViewSet(DefaultsMixin, viewsets.ModelViewSet):
     patient_serializer = PatientAppointmentSerializer
 
     def get_serializer_class(self):
-        data = User.objects.get(username=self.request.user.username)
-        qsd = Doctor.objects.filter(user = data)
-        typeDetail = 'patient'
+        data = User.objects.filter(username=self.request.user.username)
+        qsd = Doctor.objects.filter(user = data[0])
+
         if(len(qsd)>0):
-            typeDetail = 'doctor'
-        else:
-            typeDetail = 'patient'
-        
-        if typeDetail== 'doctor':
             return self.doctor_serializer
         else:
             return self.patient_serializer
