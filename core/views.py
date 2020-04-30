@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import Insurance ,Patient , Doctor , Treatment , Message , Follower
+from .models import Insurance ,Patient , Doctor , Treatment , Message , Follower, Clinic, ClinicDoctor, Appointment , Review
 from .serializers import (
     InsuranceSerializer , 
     PatientSerializer , 
@@ -12,7 +12,12 @@ from .serializers import (
     DoctorSerializer , 
     TreatmentSerializer , 
     MessageSerializer , 
-    FollowerSerializer)
+    FollowerSerializer, 
+    ClinicSerializer,
+    ClinicDoctorSerializer,
+    DoctorAppointmentSerializer,
+    PatientAppointmentSerializer,
+    ReviewSerializer,)
 
 from .mixins import DefaultsMixin, OwnerMixin
 
@@ -75,14 +80,6 @@ class UserViewSet(DefaultsMixin , viewsets.ModelViewSet):
             self.permission_classes = (permissions.AllowAny,)
         return super(UserViewSet , self).get_permissions()
 
-    def send_email(self):
-        subject = 'Welcome to ihs'
-        message = "To complete your registration, you should confirm your email. \n You just need to click link below: \n  'URL'"
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = [str(self.queryset["email"])]
-        send_mail( subject, message, email_from, recipient_list )
-   
-    
 
 class DoctorViewSet(OwnerMixin , viewsets.ModelViewSet):
     lookup_field = 'user__username'
@@ -159,3 +156,61 @@ class CustomObtainAuthToken(ObtainAuthToken):
         return Response({'token': token.key, 'type':typeDetail, 'user': serializer.data , 'detail' : serializerDetail.data})
 
 
+# class EmailViewSet(DefaultsMixin , viewsets.ModelViewSet):
+#     def post(self, request):
+#         subject = 'Welcome to ihs'
+#         message = "To complete your registration, you should confirm your email. \n You just need to click link below: \n  'URL'"
+#         email_from = settings.EMAIL_HOST_USER
+#         recipient_list = [str(self.queryset["email"])]
+#         send_mail( subject, message, email_from, recipient_list )
+
+
+class ClinicViewSet(DefaultsMixin, viewsets.ModelViewSet):
+    queryset = Clinic.objects.all()
+    serializer_class = ClinicSerializer
+
+
+class ClinicDoctorViewSet(OwnerMixin, viewsets.ModelViewSet):
+    queryset = ClinicDoctor.objects.all()
+    serializer_class = ClinicDoctorSerializer
+
+
+class AppointmentViewSet(DefaultsMixin, viewsets.ModelViewSet):
+    queryset = Appointment.objects.all()
+    doctor_serializer = DoctorAppointmentSerializer
+    patient_serializer = PatientAppointmentSerializer
+
+    def get_serializer_class(self):
+        data = User.objects.filter(username=self.request.user.username)
+        qsd = Doctor.objects.filter(user = data[0])
+
+        if(len(qsd)>0):
+            return self.doctor_serializer
+        else:
+            return self.patient_serializer
+    
+    def get_queryset(self):
+        qs = Appointment.objects.all()
+        doctor = self.request.GET.get('doctor')
+        speciality = self.request.GET.get('speciality')
+        sTime = self.request.GET.get('startTime')
+        eTime = self.request.GET.get('endTime')
+
+        if doctor is None and speciality is not None:
+            qs = qs.filter(clinic_doctor__doctor__speciality__icontains=speciality, start_time__gte=sTime, end_time__lte=eTime).order_by('start_time')
+            return qs
+        elif doctor is None and speciality is None:
+            qs = qs.filter(start_time__gte=sTime, end_time__lte=eTime).order_by('start_time')
+            return qs
+        elif doctor is not None and speciality is not None:
+            qs = qs.filter(clinic_doctor__doctor__user__username__contains=doctor,clinic_doctor__doctor__speciality__icontains=speciality, start_time__gte=sTime, end_time__lte=eTime).order_by('start_time')
+            return qs
+        elif doctor is not None and speciality is None:
+            qs = qs.filter(clinic_doctor__doctor__user__username__contains=doctor, start_time__gte=sTime, end_time__lte=eTime).order_by('start_time')
+            return qs
+            
+
+
+class ReviewViewSet(DefaultsMixin , viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
