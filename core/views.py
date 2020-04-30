@@ -193,9 +193,20 @@ class AppointmentViewSet(DefaultsMixin, viewsets.ModelViewSet):
         speciality = self.request.GET.get('speciality')
         sTime = self.request.GET.get('startTime')
         eTime = self.request.GET.get('endTime')
-        if doctor is not None:
+
+        if doctor is None and speciality is not None:
+            qs = qs.filter(clinic_doctor__doctor__speciality__icontains=speciality, start_time__gte=sTime, end_time__lte=eTime).order_by('start_time')
+            return qs
+        elif doctor is None and speciality is None:
+            qs = qs.filter(start_time__gte=sTime, end_time__lte=eTime).order_by('start_time')
+            return qs
+        elif doctor is not None and speciality is not None:
             qs = qs.filter(clinic_doctor__doctor__user__username__contains=doctor,clinic_doctor__doctor__speciality__icontains=speciality, start_time__gte=sTime, end_time__lte=eTime).order_by('start_time')
             return qs
+        elif doctor is not None and speciality is None:
+            qs = qs.filter(clinic_doctor__doctor__user__username__contains=doctor, start_time__gte=sTime, end_time__lte=eTime).order_by('start_time')
+            return qs
+            
 
 
 class ReviewViewSet(DefaultsMixin , viewsets.ModelViewSet):
