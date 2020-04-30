@@ -13,13 +13,9 @@ from .serializers import (
     FollowerSerializer, 
     ClinicSerializer,
     ClinicDoctorSerializer,
-<<<<<<< HEAD
     DoctorAppointmentSerializer,
-    PatientAppointmentSerializer,)
-=======
-    AppointmentSerializer,
+    PatientAppointmentSerializer,
     ReviewSerializer,)
->>>>>>> 9cf0aa0498365333a83de84aab54746df2e817d4
 
 from .mixins import DefaultsMixin, OwnerMixin
 
@@ -179,20 +175,34 @@ class ClinicDoctorViewSet(OwnerMixin, viewsets.ModelViewSet):
 
 class AppointmentViewSet(DefaultsMixin, viewsets.ModelViewSet):
     queryset = Appointment.objects.all()
-<<<<<<< HEAD
     doctor_serializer = DoctorAppointmentSerializer
     patient_serializer = PatientAppointmentSerializer
 
     def get_serializer_class(self):
-        doctors = Doctor.objects.get(user = self.request.user)
-        if doctors is not None:
+        data = User.objects.get(username=self.request.user.username)
+        qsd = Doctor.objects.filter(user = data)
+        typeDetail = 'patient'
+        if(len(qsd)>0):
+            typeDetail = 'doctor'
+        else:
+            typeDetail = 'patient'
+        
+        if typeDetail== 'doctor':
             return self.doctor_serializer
         else:
             return self.patient_serializer
-=======
-    serializer_class = AppointmentSerializer
+    
+    def get_queryset(self):
+        qs = Appointment.objects.all()
+        doctor = self.request.GET.get('doctor')
+        speciality = self.request.GET.get('speciality')
+        sTime = self.request.GET.get('startTime')
+        eTime = self.request.GET.get('endTime')
+        if doctor is not None:
+            qs = qs.filter(clinic_doctor__doctor__user__username__contains=doctor,clinic_doctor__doctor__speciality__icontains=speciality, start_time__gte=sTime, end_time__lte=eTime).order_by('start_time')
+            return qs
+
 
 class ReviewViewSet(DefaultsMixin , viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
->>>>>>> 9cf0aa0498365333a83de84aab54746df2e817d4

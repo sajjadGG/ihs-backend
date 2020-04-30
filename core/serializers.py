@@ -152,33 +152,30 @@ class ClinicDoctorSerializer(serializers.ModelSerializer):
 
 
 class DoctorAppointmentSerializer(serializers.ModelSerializer):
-    clinicDoctorID = serializers.ReadOnlyField(source = 'clinic_doctor.id')  #TODO : Which field or attribute of clinicDoctor is needed?
+    clinicDoctorID = serializers.ReadOnlyField(source = 'clinic_doctor.id') 
     
     class Meta:
         model = Appointment
-        fields = ['clinic_doctor', 'start_time', 'end_time', 'status', 'clinicDoctorID']  #TODO : clinicDoctorName must be added
+        fields = ['clinic_doctor', 'start_time', 'end_time', 'status', 'clinicDoctorID'] 
         extra_kwargs = {
             'clinic_doctor': {'write_only': True},
         }
 
 
-<<<<<<< HEAD
 class PatientAppointmentSerializer(serializers.ModelSerializer):
-    clinicDoctorID = serializers.ReadOnlyField(source = 'clinic_doctor.id')  #TODO : Which field or attribute of clinicDoctor is needed?
+    clinicDoctorID = serializers.ReadOnlyField(source = 'clinic_doctor.id') 
     patientUsername = serializers.ReadOnlyField(source = 'patient.user.username')
     
     class Meta:
         model = Appointment
-        fields = ['clinic_doctor', 'patient', 'start_time', 'end_time', 'status', 'patientUsername', 'clinicDoctorID']  #TODO : clinicDoctorName must be added
+        fields = ['clinic_doctor', 'patient', 'start_time', 'end_time', 'status', 'patientUsername', 'clinicDoctorID']  
         extra_kwargs = {
             'patient': {'write_only': True},
             'clinic_doctor': {'write_only': True},
         }
-=======
 #TODO : restrict reviewer and reviewee to patient and doctor
 class ReviewSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Review
         fields = ['reviewer' , 'reviewee' , 'text' , 'rating' , 'appointment']
->>>>>>> 9cf0aa0498365333a83de84aab54746df2e817d4

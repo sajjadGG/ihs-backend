@@ -39,6 +39,7 @@ class Doctor(models.Model):
     nationalId = models.CharField(max_length=63 , blank=True) # TODO : nationalId unique
     medicalCouncilId = models.CharField(max_length=63 , blank=True)  #TODO : medical council Id unique
     speciality = models.CharField(max_length=63 , blank=True , null=True)
+    
     def __str__(self):
         return self.user.username
 
