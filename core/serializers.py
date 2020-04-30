@@ -135,10 +135,19 @@ class MessageSerializer(serializers.ModelSerializer):
 
 
 class ClinicSerializer(serializers.ModelSerializer):
-
+    
     class Meta:
         model = Clinic
-        fields = ['name', 'description', 'city', 'address', 'longitude', 'latitude']
+        fields = ['id','name', 'description', 'city', 'address', 'longitude', 'latitude']
+
+    def create(self, validated_data):
+        #must be doctor
+        user =  self.context['request'].user
+        doctor = Doctor.objects.get(user=user)
+        instance = Clinic.objects.create(**validated_data)
+        ClinicDoctor.objects.create(doctor=doctor, clinic=instance)
+        return instance
+
 
 
 
@@ -156,7 +165,7 @@ class DoctorAppointmentSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Appointment
-        fields = ['clinic_doctor', 'start_time', 'end_time', 'status', 'clinicDoctorID'] 
+        fields = ['id','clinic_doctor', 'start_time', 'end_time', 'status', 'clinicDoctorID'] 
         extra_kwargs = {
             'clinic_doctor': {'write_only': True},
         }
@@ -168,7 +177,7 @@ class PatientAppointmentSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Appointment
-        fields = ['clinic_doctor', 'patient', 'start_time', 'end_time', 'status', 'patientUsername', 'clinicDoctorID']  
+        fields = ['id','clinic_doctor', 'patient', 'start_time', 'end_time', 'status', 'patientUsername', 'clinicDoctorID']  
         extra_kwargs = {
             'patient': {'write_only': True},
             'clinic_doctor': {'write_only': True},

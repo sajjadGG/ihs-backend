@@ -196,6 +196,8 @@ class AppointmentViewSet(DefaultsMixin, viewsets.ModelViewSet):
         sTime = self.request.GET.get('startTime')
         eTime = self.request.GET.get('endTime')
 
+        if(sTime is None and eTime is None):
+            return qs
         if doctor is None and speciality is not None:
             qs = qs.filter(clinic_doctor__doctor__speciality__icontains=speciality, start_time__gte=sTime, end_time__lte=eTime).order_by('start_time')
             return qs

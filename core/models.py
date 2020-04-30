@@ -102,8 +102,8 @@ class Episode(models.Model):
 #TODO : location
 class Clinic(models.Model):
     name = models.CharField(max_length=127)
-    description = models.CharField(max_length=1023)
-    city = models.CharField(max_length=64)
+    description = models.CharField(max_length=1023 , blank=True , null=True)
+    city = models.CharField(max_length=64, blank=True , null=True)
     address = models.CharField(max_length=1023)
     #location = models.PointField() #pair of longitude and latitude coordinates
     #TODO : PointField ?!
@@ -112,6 +112,8 @@ class Clinic(models.Model):
 
     def __str__(self):
         return self.name
+
+
 
 
 class ClinicDoctor(models.Model):
