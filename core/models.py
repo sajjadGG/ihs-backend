@@ -1,6 +1,10 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
+from ihs import settings
+
+import datetime
 
 # Create your models here.
 User = get_user_model()
@@ -31,6 +35,20 @@ class Patient(models.Model):
     def __str__(self):
         return self.user.username
     
+
+    def last_seen(self):
+        return cache.get('seen_%s' % self.user.username)
+
+    def online(self):
+        if self.last_seen():
+            now = datetime.datetime.now()
+            if now > self.last_seen() + datetime.timedelta(
+                        seconds=settings.USER_ONLINE_TIMEOUT):
+                return False
+            else:
+                return True
+        else:
+            return False 
 
 
 class Doctor(models.Model):

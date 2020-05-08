@@ -76,7 +76,7 @@ class PatientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Patient
-        fields = ('user' , 'nationalId' , 'diseaseHistory' , 
+        fields = ('user' , 'nationalId' , 'diseaseHistory' , 'online','last_seen', 
         'insurance' , 'supplementalInsurance' , 'weight' , 'height'  , 'owner' ,'avatar' , 'phone_number' , 'useremail' , 'userfullname' , 'userId')
         read_only_fields = ('useremail' , 'userfullname' , 'userId')
 
