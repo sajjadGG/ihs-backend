@@ -29,6 +29,7 @@ urlpatterns = [
     path(r'api/token/' , CustomObtainAuthToken.as_view() , name='api-token'),
     path(r'api/login/', include('rest_framework.urls')),
     path(r'api/' , include(router.urls)),
+    path(r'chat/', include('chat.urls')),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
