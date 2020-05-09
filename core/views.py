@@ -29,7 +29,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 
-from django.db.models import Q
+from django.db.models import Q, Avg
 
 User = get_user_model()
 
@@ -196,21 +196,22 @@ class AppointmentViewSet(DefaultsMixin, viewsets.ModelViewSet):
         sTime = self.request.GET.get('startTime')
         eTime = self.request.GET.get('endTime')
 
-        if(sTime is None and eTime is None):
+        time = sTime is not None and eTime is not None
+        if time and doctor is None and speciality is not None:
+            qs = qs.filter(clinic_doctor__doctor__speciality__icontains=speciality, start_time__gte=sTime, end_time__lte=eTime).annotate(average_rating = Avg('clinic_doctor__doctor__reviewee__rating')).order_by('average_rating')
             return qs
-        if doctor is None and speciality is not None:
-            qs = qs.filter(clinic_doctor__doctor__speciality__icontains=speciality, start_time__gte=sTime, end_time__lte=eTime).order_by('start_time')
+        elif time and doctor is None and speciality is None:
+            qs = qs.filter(start_time__gte=sTime, end_time__lte=eTime).annotate(average_rating = Avg('clinic_doctor__doctor__reviewee__rating')).order_by('average_rating')
             return qs
-        elif doctor is None and speciality is None:
-            qs = qs.filter(start_time__gte=sTime, end_time__lte=eTime).order_by('start_time')
+        elif time and doctor is not None and speciality is not None:
+            qs = qs.filter(clinic_doctor__doctor__user__username__contains=doctor,clinic_doctor__doctor__speciality__icontains=speciality, start_time__gte=sTime, end_time__lte=eTime).annotate(average_rating = Avg('clinic_doctor__doctor__reviewee__rating')).order_by('average_rating')
             return qs
-        elif doctor is not None and speciality is not None:
-            qs = qs.filter(clinic_doctor__doctor__user__username__contains=doctor,clinic_doctor__doctor__speciality__icontains=speciality, start_time__gte=sTime, end_time__lte=eTime).order_by('start_time')
+        elif time and doctor is not None and speciality is None:
+            qs = qs.filter(clinic_doctor__doctor__user__username__contains=doctor, start_time__gte=sTime, end_time__lte=eTime).annotate(average_rating = Avg('clinic_doctor__doctor__reviewee__rating')).order_by('average_rating')
             return qs
-        elif doctor is not None and speciality is None:
-            qs = qs.filter(clinic_doctor__doctor__user__username__contains=doctor, start_time__gte=sTime, end_time__lte=eTime).order_by('start_time')
-            return qs
-            
+        else:
+            return qs.annotate(average_rating = Avg('clinic_doctor__doctor__reviewee__rating')).order_by('average_rating')
+        
 
 
 class ReviewViewSet(DefaultsMixin , viewsets.ModelViewSet):

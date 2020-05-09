@@ -81,7 +81,16 @@ class PatientSerializer(serializers.ModelSerializer):
         'insurance' , 'supplementalInsurance' , 'weight' , 'height'  , 'owner' ,'avatar' , 'phone_number' , 'useremail' , 'userfullname' , 'userId')
         read_only_fields = ('useremail' , 'userfullname' , 'userId')
 
-    
+    #TODO : restrict reviewer and reviewee to patient and doctor
+class ReviewSerializer(serializers.ModelSerializer):
+    # reviewer = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
+    # queryset = User.objects.all())
+    # reviewee = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
+    # queryset = User.objects.all())
+    class Meta:
+        model = Review
+        fields = ['reviewer' , 'reviewee' , 'text' , 'rating' , 'appointment']
+
 
 
 class DoctorSerializer(serializers.ModelSerializer):
@@ -90,12 +99,12 @@ class DoctorSerializer(serializers.ModelSerializer):
     queryset = User.objects.all())
     userfullname = serializers.CharField(source = 'user.get_full_name' , read_only = True)
     userId = serializers.CharField(source = 'user.id' , read_only = True)
-    rate = serializers.SlugRelatedField(slug_field='rate', read_only=True, many=True)
+    reviewee = ReviewSerializer(many=True, required=False, read_only=True)
 
     class Meta:
         model = Doctor
-        fields = ('user' , 'nationalId' , 'medicalCouncilId' , 'owner' ,'avatar' , 'userfullname' , 'userId' , 'speciality', 'rate')
-        read_only_fields = ['userfullname' , 'userId', 'rate']
+        fields = ('user' , 'nationalId' , 'medicalCouncilId' , 'owner' ,'avatar' , 'userfullname' , 'userId' , 'speciality', 'reviewee')
+        read_only_fields = ['userfullname' , 'userId', 'reviewee']
 #TODO : no post
 
 
@@ -187,12 +196,3 @@ class PatientAppointmentSerializer(serializers.ModelSerializer):
             'patient': {'write_only': True},
             'clinic_doctor': {'write_only': True},
         }
-#TODO : restrict reviewer and reviewee to patient and doctor
-class ReviewSerializer(serializers.ModelSerializer):
-    reviewer = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
-    queryset = User.objects.all())
-    reviewee = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
-    queryset = User.objects.all())
-    class Meta:
-        model = Review
-        fields = ['reviewer' , 'reviewee' , 'text' , 'rating' , 'appointment']
