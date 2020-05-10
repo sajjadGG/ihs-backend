@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
-from .models import Insurance , Patient , Doctor , Treatment , Message , Follower, Clinic, Appointment, ClinicDoctor , Review
+from .models import Insurance , Patient , Doctor , Treatment , Message , Follower, Clinic, Appointment, ClinicDoctor , Review , Notification
 
 from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
@@ -191,3 +191,12 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ['reviewer' , 'reviewee' , 'text' , 'rating' , 'appointment']
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+
+    user = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
+    queryset = User.objects.all())
+    class Meta:
+        model = Notification
+        fields =('user' , 'title' , 'text'  , 'viewed' , 'category' , 'time_created')

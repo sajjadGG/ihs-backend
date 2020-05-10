@@ -198,6 +198,21 @@ class Message(models.Model):
     time_updated = models.DateTimeField(auto_now=True)
 
 
+class Notification(models.Model):
+    CATEGORY = (
+        ('M' , _('Medicine')),
+        ('C' , _('Chat')),
+        ('A' , _('Appointment')),
+        ('W' , _('Website')),
+    )
+
+
+    user = models.ForeignKey(User , on_delete=models.CASCADE)
+    title = models.CharField(max_length=127)
+    text = models.CharField(max_length=500)
+    viewed = models.BooleanField()
+    category = models.CharField(max_length=1 , choices = CATEGORY , default = 'W')
+    time_created = models.DateTimeField(auto_now_add=True)
 
 
 

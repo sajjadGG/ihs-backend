@@ -15,3 +15,6 @@ router.register(r'clinic' , views.ClinicViewSet)
 router.register(r'clinicdoctor' , views.ClinicDoctorViewSet)
 router.register(r'appointment' , views.AppointmentViewSet)
 router.register(r'reviews' , views.ReviewViewSet)
+
+
+router.register(r'notifications' , views.NotificationViewSet)

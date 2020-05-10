@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import Insurance ,Patient , Doctor , Treatment , Message , Follower, Clinic, ClinicDoctor, Appointment , Review
+from .models import Insurance ,Patient , Doctor , Treatment , Message , Follower, Clinic, ClinicDoctor, Appointment , Review , Notification
 from .serializers import (
     InsuranceSerializer , 
     PatientSerializer , 
@@ -17,7 +17,8 @@ from .serializers import (
     ClinicDoctorSerializer,
     DoctorAppointmentSerializer,
     PatientAppointmentSerializer,
-    ReviewSerializer,)
+    ReviewSerializer,
+    NotificationSerializer)
 
 from .mixins import DefaultsMixin, OwnerMixin
 
@@ -216,3 +217,16 @@ class AppointmentViewSet(DefaultsMixin, viewsets.ModelViewSet):
 class ReviewViewSet(DefaultsMixin , viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+
+
+class NotificationViewSet(DefaultsMixin , viewsets.ModelViewSet):
+    queryset = Notification.objects.order_by('time_created')
+    serializer_class = NotificationSerializer
+
+    def get_queryset(self):
+        qs = Notification.objects.order_by('time_created')
+        query = self.request.GET.get('user')
+
+        if query is not None:
+            qs = qs.filter(user__username = query).order_by('time_created')
+        return qs
