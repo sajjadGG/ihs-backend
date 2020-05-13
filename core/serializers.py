@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
-from .models import Insurance , Patient , Doctor , Treatment , Message , Follower, Clinic, Appointment, ClinicDoctor , Review, Disease
+from .models import Insurance , Patient , Doctor , Treatment , Message , Follower, Clinic, Appointment, ClinicDoctor , Review, Disease, Speciality, Medicine
 
 from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
@@ -197,7 +197,20 @@ class PatientAppointmentSerializer(serializers.ModelSerializer):
             'clinic_doctor': {'write_only': True},
         }
 
+
+class SpecialitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Speciality
+        fields = ['name']
+
+
 class DiseaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Disease
-        fields = ['disease_name']
+        fields = ['name', 'related_speciality']
+
+
+class MedicineSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Medicine
+        fields = ['name']

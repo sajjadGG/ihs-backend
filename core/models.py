@@ -16,6 +16,12 @@ def upload_avatar_image(instance , filename):
 class Insurance(models.Model):
     orgname = models.CharField(max_length = 127)
 
+
+class Medicine(models.Model):
+    #TODO : populate with standardized field
+    name = models.CharField(max_length=127)
+
+    
 class Patient(models.Model):
     user = models.OneToOneField(User ,primary_key = True, on_delete=models.CASCADE)
     avatar = models.ImageField(upload_to = upload_avatar_image , null=True , blank=True)
@@ -26,19 +32,25 @@ class Patient(models.Model):
     supplementalInsurance = models.ForeignKey(Insurance , on_delete=models.CASCADE , blank=True ,null=True, related_name='patinet_supplemental_set')#TODO :  insurance id 1 must be defined for no supplemental insurance
     weight = models.DecimalField(blank=True ,null=True, decimal_places=3 , max_digits=7)
     height = models.DecimalField(blank=True ,null=True, decimal_places=3 , max_digits=7)
+    medicine = models.ManyToManyField(Medicine, null=True, blank=True)
     #TODO :  Friendship is symmetric
 
     def __str__(self):
         return self.user.username
     
 
+class Speciality(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
 
 class Doctor(models.Model):
     user = models.OneToOneField(User , primary_key = True , on_delete=models.CASCADE)
     avatar = models.ImageField(upload_to = upload_avatar_image , null=True , blank=True)
     nationalId = models.CharField(max_length=63 , blank=True) # TODO : nationalId unique
     medicalCouncilId = models.CharField(max_length=63 , blank=True)  #TODO : medical council Id unique
-    speciality = models.CharField(max_length=63 , blank=True , null=True)
+    speciality = models.ForeignKey(Speciality, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.user.username
@@ -133,6 +145,13 @@ class ClinicDoctor(models.Model):
         unique_together = ('doctor' , 'clinic')
 
 
+class Disease(models.Model):
+    name = models.CharField(max_length=100)
+    related_speciality = models.ForeignKey(Speciality, on_delete = models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
 
 #TODO : set on doctor or clinic ?
 class Appointment(models.Model):
@@ -198,9 +217,6 @@ class Message(models.Model):
     time_created = models.DateTimeField(auto_now_add=True)
     time_updated = models.DateTimeField(auto_now=True)
 
-
-class Disease(models.Model):
-    disease_name = models.CharField(max_length=100)
 
 
 

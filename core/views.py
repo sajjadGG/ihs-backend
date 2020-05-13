@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import Insurance ,Patient , Doctor , Treatment , Message , Follower, Clinic, ClinicDoctor, Appointment , Review, Disease
+from .models import Insurance ,Patient , Doctor , Treatment , Message , Follower, Clinic, ClinicDoctor, Appointment , Review, Disease, Speciality, Medicine
 from .serializers import (
     InsuranceSerializer , 
     PatientSerializer , 
@@ -18,7 +18,9 @@ from .serializers import (
     DoctorAppointmentSerializer,
     PatientAppointmentSerializer,
     ReviewSerializer,
-    DiseaseSerializer,)
+    DiseaseSerializer,
+    SpecialitySerializer,
+    MedicineSerializer,)
 
 from .mixins import DefaultsMixin, OwnerMixin
 
@@ -145,16 +147,28 @@ class CustomObtainAuthToken(ObtainAuthToken):
         token = Token.objects.get(key=response.data['token'])
         data = User.objects.get(username=request.POST.get('username'))
         serializer= UserSerializer(data)
+        follow = Follower.objects.filter(followee = data)
+        followerSerializer = FollowerSerializer(follow)
         qsp = Patient.objects.filter(user = data)
         qsd = Doctor.objects.filter(user = data)
         typeDetail = 'patient'
         if(len(qsp)>0):
             serializerDetail = PatientSerializer(qsp[0])
             typeDetail = 'patient'
+            qsa = Appointment.objects.filter(patient = qsp)
+            if len(qsa)>5:
+                appointmentSerializer = PatientAppointmentSerializer(qsa[:5])
+            else:
+                appointmentSerializer = PatientAppointmentSerializer(qsa)
         else:
             serializerDetail = DoctorSerializer(qsd[0])
             typeDetail = 'doctor'
-        return Response({'token': token.key, 'type':typeDetail, 'user': serializer.data , 'detail' : serializerDetail.data})
+            qsa = Appointment.objects.filter(clinic_doctor__doctor = qsd)
+            if len(qsa)>5:
+                appointmentSerializer = DoctorAppointmentSerializer(qsa[:5])
+            else:
+                appointmentSerializer = DoctorAppointmentSerializer(qsa)
+        return Response({'token': token.key, 'type':typeDetail, 'user': serializer.data , 'detail' : serializerDetail.data, 'appointment' : appointmentSerializer.data, 'follower': followerSerializer.data})
 
 
 # class EmailViewSet(DefaultsMixin , viewsets.ModelViewSet):
@@ -199,13 +213,13 @@ class AppointmentViewSet(DefaultsMixin, viewsets.ModelViewSet):
 
         time = sTime is not None and eTime is not None
         if time and doctor is None and speciality is not None:
-            qs = qs.filter(clinic_doctor__doctor__speciality__icontains=speciality, start_time__gte=sTime, end_time__lte=eTime).annotate(average_rating = Avg('clinic_doctor__doctor__reviewee__rating')).order_by('average_rating')
+            qs = qs.filter(clinic_doctor__doctor__speciality__name__icontains=speciality, start_time__gte=sTime, end_time__lte=eTime).annotate(average_rating = Avg('clinic_doctor__doctor__reviewee__rating')).order_by('average_rating')
             return qs
         elif time and doctor is None and speciality is None:
             qs = qs.filter(start_time__gte=sTime, end_time__lte=eTime).annotate(average_rating = Avg('clinic_doctor__doctor__reviewee__rating')).order_by('average_rating')
             return qs
         elif time and doctor is not None and speciality is not None:
-            qs = qs.filter(clinic_doctor__doctor__user__username__contains=doctor,clinic_doctor__doctor__speciality__icontains=speciality, start_time__gte=sTime, end_time__lte=eTime).annotate(average_rating = Avg('clinic_doctor__doctor__reviewee__rating')).order_by('average_rating')
+            qs = qs.filter(clinic_doctor__doctor__user__username__contains=doctor,clinic_doctor__doctor__speciality__name__icontains=speciality, start_time__gte=sTime, end_time__lte=eTime).annotate(average_rating = Avg('clinic_doctor__doctor__reviewee__rating')).order_by('average_rating')
             return qs
         elif time and doctor is not None and speciality is None:
             qs = qs.filter(clinic_doctor__doctor__user__username__contains=doctor, start_time__gte=sTime, end_time__lte=eTime).annotate(average_rating = Avg('clinic_doctor__doctor__reviewee__rating')).order_by('average_rating')
@@ -224,3 +238,13 @@ class ReviewViewSet(DefaultsMixin , viewsets.ModelViewSet):
 class DiseaseViewSet (DefaultsMixin, viewsets.ModelViewSet):
     queryset = Disease.objects.all()
     serializer_class = DiseaseSerializer
+
+
+class SpecialityViewSet(DefaultsMixin, viewsets.ModelViewSet):
+    queryset = Speciality.objects.all()
+    serializer_class = SpecialitySerializer
+
+
+class MedicineViewSet(DefaultsMixin, viewsets.ModelViewSet):
+    queryset = Medicine.objects.all()
+    serializer = MedicineSerializer
