@@ -21,7 +21,9 @@ class Medicine(models.Model):
     #TODO : populate with standardized field
     name = models.CharField(max_length=127)
 
-    
+    def __str__(self):
+        return self.name
+
 class Patient(models.Model):
     user = models.OneToOneField(User ,primary_key = True, on_delete=models.CASCADE)
     avatar = models.ImageField(upload_to = upload_avatar_image , null=True , blank=True)
@@ -32,7 +34,7 @@ class Patient(models.Model):
     supplementalInsurance = models.ForeignKey(Insurance , on_delete=models.CASCADE , blank=True ,null=True, related_name='patinet_supplemental_set')#TODO :  insurance id 1 must be defined for no supplemental insurance
     weight = models.DecimalField(blank=True ,null=True, decimal_places=3 , max_digits=7)
     height = models.DecimalField(blank=True ,null=True, decimal_places=3 , max_digits=7)
-    medicine = models.ManyToManyField(Medicine, null=True, blank=True)
+    medicine = models.ManyToManyField(Medicine)
     #TODO :  Friendship is symmetric
 
     def __str__(self):
@@ -189,9 +191,6 @@ class Review(models.Model):
     episode = models.ForeignKey(Episode , on_delete=models.CASCADE , blank=True , null=True)#TODO : chekc wheter this episode is in treatment specified or with right doctor
     appointment = models.ForeignKey(Appointment , on_delete=models.CASCADE , blank=True , null=True)
 
-class Medicine(models.Model):
-    #TODO : populate with standardized field
-    name = models.CharField(max_length=127)
     
 #TODO : rethink our reminder implementation
 class MedReminder(models.Model):

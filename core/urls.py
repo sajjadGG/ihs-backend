@@ -17,4 +17,5 @@ router.register(r'appointment' , views.AppointmentViewSet)
 router.register(r'reviews' , views.ReviewViewSet)
 router.register(r'disease' , views.DiseaseViewSet)
 router.register(r'speciality' , views.SpecialityViewSet)
+router.register(r'mdicine' , views.MedicineViewSet)
 
