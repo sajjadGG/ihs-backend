@@ -247,4 +247,4 @@ class SpecialityViewSet(DefaultsMixin, viewsets.ModelViewSet):
 
 class MedicineViewSet(DefaultsMixin, viewsets.ModelViewSet):
     queryset = Medicine.objects.all()
-    serializer = MedicineSerializer
+    serializer_class = MedicineSerializer
