@@ -6,6 +6,11 @@ from .models import Insurance , Patient , Doctor , Treatment , Message , Followe
 from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
 
+from .signals import appointment_reserved
+
+
+from django.shortcuts import get_object_or_404
+
 User = get_user_model()
 
 #TODO :  define owner for all serialize based on who can change it
@@ -182,6 +187,18 @@ class PatientAppointmentSerializer(serializers.ModelSerializer):
             'patient': {'write_only': True},
             'clinic_doctor': {'write_only': True},
         }
+
+
+    def update(self , instance , validated_data):
+        if validated_data["patient"] is not None:
+            appointment_reserved.send(sender = self.__class__ , clinic_doctor = instance.clinic_doctor , patient = validated_data['patient'] , 
+            status = validated_data['status'])
+        elif instance.patient is not None:
+            print(instance.patient)
+            appointment_reserved.send(sender = self.__class__ , clinic_doctor = instance.clinic_doctor , patient = instance.patient , 
+            status = validated_data['status'])
+        return super(PatientAppointmentSerializer , self).update(instance , validated_data)
+
 #TODO : restrict reviewer and reviewee to patient and doctor
 class ReviewSerializer(serializers.ModelSerializer):
     reviewer = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
@@ -200,3 +217,5 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields =('user' , 'title' , 'text'  , 'viewed' , 'category' , 'time_created')
+
+

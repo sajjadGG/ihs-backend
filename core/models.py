@@ -210,7 +210,7 @@ class Notification(models.Model):
     user = models.ForeignKey(User , on_delete=models.CASCADE)
     title = models.CharField(max_length=127)
     text = models.CharField(max_length=500)
-    viewed = models.BooleanField()
+    viewed = models.BooleanField(default=False)
     category = models.CharField(max_length=1 , choices = CATEGORY , default = 'W')
     time_created = models.DateTimeField(auto_now_add=True)
 

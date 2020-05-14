@@ -32,6 +32,7 @@ from rest_framework.authtoken.models import Token
 
 from django.db.models import Q
 
+
 User = get_user_model()
 
 
@@ -211,6 +212,7 @@ class AppointmentViewSet(DefaultsMixin, viewsets.ModelViewSet):
         elif doctor is not None and speciality is None:
             qs = qs.filter(clinic_doctor__doctor__user__username__contains=doctor, start_time__gte=sTime, end_time__lte=eTime).order_by('start_time')
             return qs
+
             
 
 
@@ -228,5 +230,6 @@ class NotificationViewSet(DefaultsMixin , viewsets.ModelViewSet):
         query = self.request.GET.get('user')
 
         if query is not None:
-            qs = qs.filter(user__username = query).order_by('time_created')
+            qs = qs.filter(user__username   = query).order_by('time_created')
         return qs
+
