@@ -161,8 +161,8 @@ class Review(models.Model):
 
     )
 
-    reviewer = models.ForeignKey(User , on_delete=models.CASCADE , related_name='reviewer_set') #TODO : annonymous review
-    reviewee = models.ForeignKey(User , on_delete=models.CASCADE , related_name = 'reveiwee_set')
+    reviewer = models.ForeignKey(Patient , on_delete=models.CASCADE , related_name='reviewer') #TODO : annonymous review
+    reviewee = models.ForeignKey(Doctor , on_delete=models.CASCADE , related_name = 'reviewee')
     text = models.CharField(max_length=1023 , blank=True , null=True)
     rating = models.IntegerField(choices=QUALITY)
     treatment = models.ForeignKey(Treatment , on_delete=models.CASCADE , blank=True , null=True)
