@@ -57,6 +57,8 @@ class FollowerSerializer(serializers.ModelSerializer):
         model = Follower
         fields = ('id' , 'followee' , 'follower' )
 
+
+
 class InsuranceSerializer(serializers.ModelSerializer):
     
     class Meta:
@@ -65,7 +67,6 @@ class InsuranceSerializer(serializers.ModelSerializer):
 
 
 
-        
 class PatientSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source = 'user.username')
     user = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
@@ -89,12 +90,14 @@ class DoctorSerializer(serializers.ModelSerializer):
     queryset = User.objects.all())
     userfullname = serializers.CharField(source = 'user.get_full_name' , read_only = True)
     userId = serializers.CharField(source = 'user.id' , read_only = True)
+    rate = serializers.SlugRelatedField(slug_field='rate', read_only=True, many=True)
 
     class Meta:
         model = Doctor
-        fields = ('user' , 'nationalId' , 'medicalCouncilId' , 'owner' ,'avatar' , 'userfullname' , 'userId' , 'speciality')
-        read_only_fields = ['userfullname' , 'userId']
+        fields = ('user' , 'nationalId' , 'medicalCouncilId' , 'owner' ,'avatar' , 'userfullname' , 'userId' , 'speciality', 'rate')
+        read_only_fields = ['userfullname' , 'userId', 'rate']
 #TODO : no post
+
 
 #TODO : only the user login for itself can post or update or get 
 class TreatmentSerializer(serializers.ModelSerializer):
@@ -110,6 +113,7 @@ class TreatmentSerializer(serializers.ModelSerializer):
             'patient' : {'write_only' : True},
             'doctor' : {'write_only' : True}
         }
+
 
 #TODO : or with slugrealted field ?
 class MessageSerializer(serializers.ModelSerializer):
@@ -174,6 +178,7 @@ class DoctorAppointmentSerializer(serializers.ModelSerializer):
 class PatientAppointmentSerializer(serializers.ModelSerializer):
     clinicDoctorID = serializers.ReadOnlyField(source = 'clinic_doctor.id') 
     patientUsername = serializers.ReadOnlyField(source = 'patient.user.username')
+
     
     class Meta:
         model = Appointment
