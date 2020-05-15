@@ -148,6 +148,7 @@ class Appointment(models.Model):
     end_time = models.DateTimeField()
     status = models.CharField(max_length=1,choices=STATUS , default = 'O')
     patient = models.ForeignKey(Patient , on_delete=models.CASCADE , null=True , blank=True)
+    disease = models.ForeignKey(Disease, on_delete=models.CASCADE, null=True, blank=True)
 
 
 #TODO : shall we also save cumulative score on user ?
@@ -198,7 +199,8 @@ class Message(models.Model):
     time_updated = models.DateTimeField(auto_now=True)
 
 
-
+class Disease(models.Model):
+    disease_name = models.CharField(max_length=100)
 
 
 

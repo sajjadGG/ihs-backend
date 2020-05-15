@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
-from .models import Insurance , Patient , Doctor , Treatment , Message , Follower, Clinic, Appointment, ClinicDoctor , Review
+from .models import Insurance , Patient , Doctor , Treatment , Message , Follower, Clinic, Appointment, ClinicDoctor , Review, Disease
 
 from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
@@ -191,8 +191,13 @@ class PatientAppointmentSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Appointment
-        fields = ['id','clinic_doctor', 'patient', 'start_time', 'end_time', 'status', 'patientUsername', 'clinicDoctorID']  
+        fields = ['id','clinic_doctor', 'patient', 'start_time', 'end_time', 'status', 'patientUsername', 'clinicDoctorID', 'disease']  
         extra_kwargs = {
             'patient': {'write_only': True},
             'clinic_doctor': {'write_only': True},
         }
+
+class DiseaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Disease
+        fields = ['disease_name']

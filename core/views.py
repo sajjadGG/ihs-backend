@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import Insurance ,Patient , Doctor , Treatment , Message , Follower, Clinic, ClinicDoctor, Appointment , Review
+from .models import Insurance ,Patient , Doctor , Treatment , Message , Follower, Clinic, ClinicDoctor, Appointment , Review, Disease
 from .serializers import (
     InsuranceSerializer , 
     PatientSerializer , 
@@ -17,7 +17,8 @@ from .serializers import (
     ClinicDoctorSerializer,
     DoctorAppointmentSerializer,
     PatientAppointmentSerializer,
-    ReviewSerializer,)
+    ReviewSerializer,
+    DiseaseSerializer,)
 
 from .mixins import DefaultsMixin, OwnerMixin
 
@@ -217,3 +218,9 @@ class AppointmentViewSet(DefaultsMixin, viewsets.ModelViewSet):
 class ReviewViewSet(DefaultsMixin , viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+
+
+
+class DiseaseViewSet (DefaultsMixin, viewsets.ModelViewSet):
+    queryset = Disease.objects.all()
+    serializer_class = DiseaseSerializer
