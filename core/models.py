@@ -43,15 +43,7 @@ class Patient(models.Model):
 
     def __str__(self):
         return self.user.username
-    
 
-<<<<<<< HEAD
-class Speciality(models.Model):
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
-=======
     def last_seen(self):
         return cache.get('seen_%s' % self.user.username)
 
@@ -65,8 +57,15 @@ class Speciality(models.Model):
                 return True
         else:
             return False 
+    
 
->>>>>>> userOnlineStatus
+class Speciality(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+    
+
 
 class Doctor(models.Model):
     user = models.OneToOneField(User , primary_key = True , on_delete=models.CASCADE)
@@ -77,6 +76,20 @@ class Doctor(models.Model):
 
     def __str__(self):
         return self.user.username
+
+    def last_seen(self):
+        return cache.get('seen_%s' % self.user.username)
+
+    def online(self):
+        if self.last_seen():
+            now = datetime.datetime.now()
+            if now > self.last_seen() + datetime.timedelta(
+                        seconds=settings.USER_ONLINE_TIMEOUT):
+                return False
+            else:
+                return True
+        else:
+            return False 
 
 
 class Follower(models.Model):

@@ -103,7 +103,7 @@ class DoctorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Doctor
-        fields = ('user' , 'nationalId' , 'medicalCouncilId' , 'owner' ,'avatar' , 'userfullname' , 'userId' , 'speciality', 'reviewee')
+        fields = ('user' , 'nationalId' , 'medicalCouncilId' , 'owner' ,'avatar' , 'userfullname' , 'userId' , 'speciality', 'reviewee' , 'online','last_seen',)
         read_only_fields = ['userfullname' , 'userId', 'reviewee']
 #TODO : no post
 
