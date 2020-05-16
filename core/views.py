@@ -4,7 +4,8 @@ from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import Insurance ,Patient , Doctor , Treatment , Message , Follower, Clinic, ClinicDoctor, Appointment , Review, Disease, Speciality, Medicine
+from .models import Insurance ,Patient , Doctor , Treatment , Message , Follower, Clinic, ClinicDoctor, Appointment , Review, Disease, Speciality, Medicine , Notification
+
 from .serializers import (
     InsuranceSerializer , 
     PatientSerializer , 
@@ -20,7 +21,8 @@ from .serializers import (
     ReviewSerializer,
     DiseaseSerializer,
     SpecialitySerializer,
-    MedicineSerializer,)
+    MedicineSerializer,
+    NotificationSerializer)
 
 from .mixins import DefaultsMixin, OwnerMixin
 
@@ -33,6 +35,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 
 from django.db.models import Q, Avg
+
 
 User = get_user_model()
 
@@ -248,3 +251,15 @@ class SpecialityViewSet(DefaultsMixin, viewsets.ModelViewSet):
 class MedicineViewSet(DefaultsMixin, viewsets.ModelViewSet):
     queryset = Medicine.objects.all()
     serializer_class = MedicineSerializer
+class NotificationViewSet(DefaultsMixin , viewsets.ModelViewSet):
+    queryset = Notification.objects.order_by('time_created')
+    serializer_class = NotificationSerializer
+
+    def get_queryset(self):
+        qs = Notification.objects.order_by('time_created')
+        query = self.request.GET.get('user')
+
+        if query is not None:
+            qs = qs.filter(user__username   = query).order_by('time_created')
+        return qs
+
