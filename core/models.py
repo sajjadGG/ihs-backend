@@ -1,6 +1,10 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
+from ihs import settings
+
+import datetime
 
 # Create your models here.
 User = get_user_model()
@@ -39,6 +43,20 @@ class Patient(models.Model):
 
     def __str__(self):
         return self.user.username
+
+    def last_seen(self):
+        return cache.get('seen_%s' % self.user.username)
+
+    def online(self):
+        if self.last_seen():
+            now = datetime.datetime.now()
+            if now > self.last_seen() + datetime.timedelta(
+                        seconds=settings.USER_ONLINE_TIMEOUT):
+                return False
+            else:
+                return True
+        else:
+            return False 
     
 
 class Speciality(models.Model):
@@ -46,6 +64,8 @@ class Speciality(models.Model):
 
     def __str__(self):
         return self.name
+    
+
 
 class Doctor(models.Model):
     user = models.OneToOneField(User , primary_key = True , on_delete=models.CASCADE)
@@ -56,6 +76,20 @@ class Doctor(models.Model):
 
     def __str__(self):
         return self.user.username
+
+    def last_seen(self):
+        return cache.get('seen_%s' % self.user.username)
+
+    def online(self):
+        if self.last_seen():
+            now = datetime.datetime.now()
+            if now > self.last_seen() + datetime.timedelta(
+                        seconds=settings.USER_ONLINE_TIMEOUT):
+                return False
+            else:
+                return True
+        else:
+            return False 
 
 
 class Follower(models.Model):
@@ -217,6 +251,21 @@ class Message(models.Model):
     time_updated = models.DateTimeField(auto_now=True)
 
 
+class Notification(models.Model):
+    CATEGORY = (
+        ('M' , _('Medicine')),
+        ('C' , _('Chat')),
+        ('A' , _('Appointment')),
+        ('W' , _('Website')),
+    )
+
+
+    user = models.ForeignKey(User , on_delete=models.CASCADE)
+    title = models.CharField(max_length=127)
+    text = models.CharField(max_length=500)
+    viewed = models.BooleanField(default=False)
+    category = models.CharField(max_length=1 , choices = CATEGORY , default = 'W')
+    time_created = models.DateTimeField(auto_now_add=True)
 
 
 

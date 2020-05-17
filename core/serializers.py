@@ -1,10 +1,16 @@
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
-from .models import Insurance , Patient , Doctor , Treatment , Message , Follower, Clinic, Appointment, ClinicDoctor , Review, Disease, Speciality, Medicine
+from .models import Insurance , Patient , Doctor , Treatment , Message , Follower, Clinic, Appointment, ClinicDoctor , Review, Disease, Speciality, Medicine,Notification
+
 
 from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
+
+from .signals import appointment_reserved
+
+
+from django.shortcuts import get_object_or_404
 
 User = get_user_model()
 
@@ -53,11 +59,30 @@ class FollowerSerializer(serializers.ModelSerializer):
     queryset = User.objects.all())
     follower = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
     queryset = User.objects.all() ,default=serializers.CurrentUserDefault())
+    followee_detail = serializers.SerializerMethodField(read_only=True)
+    follower_detail = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Follower
-        fields = ('id' , 'followee' , 'follower' )
+        fields = ('id' , 'followee' , 'follower','followee_detail' ,'follower_detail')
 
+    def get_followee_detail(self , obj):
+        qsd = Doctor.objects.filter(user = obj.followee)
+        serializer = DoctorSerializer if len(qsd)>0 else PatientSerializer
+        if len(qsd)==0:
+            qsd = Patient.objects.filter(user = obj.followee)
+        res=UserSerializer(obj.followee).data
+        res.update(serializer(qsd[0]).data)
+        return res
 
+    def get_follower_detail(self , obj):
+        qsd = Doctor.objects.filter(user = obj.follower)
+        serializer = DoctorSerializer if len(qsd)>0 else PatientSerializer
+        if len(qsd)==0:
+            qsd = Patient.objects.filter(user = obj.follower)
+        res=UserSerializer(obj.follower).data
+        res.update(serializer(qsd[0]).data)
+        return res
 
 class InsuranceSerializer(serializers.ModelSerializer):
     
@@ -77,7 +102,7 @@ class PatientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Patient
-        fields = ('user' , 'nationalId' , 'diseaseHistory' , 
+        fields = ('user' , 'nationalId' , 'diseaseHistory' , 'online','last_seen', 
         'insurance' , 'supplementalInsurance' , 'weight' , 'height'  , 'owner' ,'avatar' , 'phone_number' , 'useremail' , 'userfullname' , 'userId')
         read_only_fields = ('useremail' , 'userfullname' , 'userId')
 
@@ -104,7 +129,7 @@ class DoctorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Doctor
-        fields = ('user' , 'nationalId' , 'medicalCouncilId' , 'owner' ,'avatar' , 'userfullname' , 'userId' , 'speciality', 'reviewee')
+        fields = ('user' , 'nationalId' , 'medicalCouncilId' , 'owner' ,'avatar' , 'userfullname' , 'userId' , 'speciality', 'reviewee' , 'online','last_seen',)
         read_only_fields = ['userfullname' , 'userId', 'reviewee']
 #TODO : no post
 
@@ -171,33 +196,57 @@ class ClinicDoctorSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ClinicDoctor
-        fields = ['clinic', 'doctor', 'clinicName', 'doctorUsername']
+        fields = ['clinic', 'doctor', 'clinicName', 'doctorUsername', 'id']
+    
+    # def create(self, validated_data):
+    #     # must be owner of doctor
+    #     user = self.context['request'].user
+    #     doctor = Doctor.objects.get(user=user)
+    #     if 'doctor' == doctor:
+    #         ClinicDoctor.objects.create(doctor=doctor, clinic=)
+
 
 
 class DoctorAppointmentSerializer(serializers.ModelSerializer):
     clinicDoctorID = serializers.ReadOnlyField(source = 'clinic_doctor.id') 
+    clinic  = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = Appointment
-        fields = ['id','clinic_doctor', 'start_time', 'end_time', 'status', 'clinicDoctorID'] 
+        fields = ['id','clinic_doctor', 'start_time', 'end_time', 'status', 'clinicDoctorID' ,'clinic']  
         extra_kwargs = {
+            'patient': {'write_only': True},
             'clinic_doctor': {'write_only': True},
         }
+    def get_clinic(self , obj):
+        return ClinicSerializer(obj.clinic_doctor.clinic).data
 
 
 class PatientAppointmentSerializer(serializers.ModelSerializer):
     clinicDoctorID = serializers.ReadOnlyField(source = 'clinic_doctor.id') 
     patientUsername = serializers.ReadOnlyField(source = 'patient.user.username')
-
-
+    clinic  = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = Appointment
-        fields = ['id','clinic_doctor', 'patient', 'start_time', 'end_time', 'status', 'patientUsername', 'clinicDoctorID', 'disease']  
+        fields = ['id','clinic_doctor', 'patient', 'start_time', 'end_time', 'status', 'patientUsername', 'clinicDoctorID', 'disease' ,'clinic']  
         extra_kwargs = {
             'patient': {'write_only': True},
             'clinic_doctor': {'write_only': True},
         }
+    def get_clinic(self , obj):
+        return ClinicSerializer(obj.clinic_doctor.clinic).data
+
+    def update(self , instance , validated_data):
+        if validated_data["patient"] is not None:
+            appointment_reserved.send(sender = self.__class__ , clinic_doctor = instance.clinic_doctor , patient = validated_data['patient'] , 
+            status = validated_data['status'])
+        elif instance.patient is not None:
+            print(instance.patient)
+            appointment_reserved.send(sender = self.__class__ , clinic_doctor = instance.clinic_doctor , patient = instance.patient , 
+            status = validated_data['status'])
+        return super(PatientAppointmentSerializer , self).update(instance , validated_data)
+
 
 
 class SpecialitySerializer(serializers.ModelSerializer):
@@ -216,3 +265,25 @@ class MedicineSerializer(serializers.ModelSerializer):
     class Meta:
         model = Medicine
         fields = ['name']
+    
+
+#TODO : restrict reviewer and reviewee to patient and doctor
+class ReviewSerializer(serializers.ModelSerializer):
+    reviewer = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
+    queryset = User.objects.all())
+    reviewee = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
+    queryset = User.objects.all())
+    class Meta:
+        model = Review
+        fields = ['reviewer' , 'reviewee' , 'text' , 'rating' , 'appointment']
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+
+    user = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
+    queryset = User.objects.all())
+    class Meta:
+        model = Notification
+        fields =('user' , 'title' , 'text'  , 'viewed' , 'category' , 'time_created')
+
+
