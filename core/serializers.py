@@ -59,11 +59,30 @@ class FollowerSerializer(serializers.ModelSerializer):
     queryset = User.objects.all())
     follower = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
     queryset = User.objects.all() ,default=serializers.CurrentUserDefault())
+    followee_detail = serializers.SerializerMethodField(read_only=True)
+    follower_detail = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Follower
-        fields = ('id' , 'followee' , 'follower' )
+        fields = ('id' , 'followee' , 'follower','followee_detail' ,'follower_detail')
 
+    def get_followee_detail(self , obj):
+        qsd = Doctor.objects.filter(user = obj.followee)
+        serializer = DoctorSerializer if len(qsd)>0 else PatientSerializer
+        if len(qsd)==0:
+            qsd = Patient.objects.filter(user = obj.followee)
+        res=UserSerializer(obj.followee).data
+        res.update(serializer(qsd[0]).data)
+        return res
 
+    def get_follower_detail(self , obj):
+        qsd = Doctor.objects.filter(user = obj.follower)
+        serializer = DoctorSerializer if len(qsd)>0 else PatientSerializer
+        if len(qsd)==0:
+            qsd = Patient.objects.filter(user = obj.follower)
+        res=UserSerializer(obj.follower).data
+        res.update(serializer(qsd[0]).data)
+        return res
 
 class InsuranceSerializer(serializers.ModelSerializer):
     
