@@ -106,6 +106,7 @@ class PatientSerializer(serializers.ModelSerializer):
         'insurance' , 'supplementalInsurance' , 'weight' , 'height'  , 'owner' ,'avatar' , 'phone_number' , 'useremail' , 'userfullname' , 'userId')
         read_only_fields = ('useremail' , 'userfullname' , 'userId')
 
+
     #TODO : restrict reviewer and reviewee to patient and doctor
 class ReviewSerializer(serializers.ModelSerializer):
     # reviewer = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
@@ -195,24 +196,31 @@ class ClinicDoctorSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ClinicDoctor
-        fields = ['clinic', 'doctor', 'clinicName', 'doctorUsername']
+        fields = ['clinic', 'doctor', 'clinicName', 'doctorUsername', 'id']
+    
+    # def create(self, validated_data):
+    #     # must be owner of doctor
+    #     user = self.context['request'].user
+    #     doctor = Doctor.objects.get(user=user)
+    #     if 'doctor' == doctor:
+    #         ClinicDoctor.objects.create(doctor=doctor, clinic=)
 
 
 
 class DoctorAppointmentSerializer(serializers.ModelSerializer):
     clinicDoctorID = serializers.ReadOnlyField(source = 'clinic_doctor.id') 
-    patientUsername = serializers.ReadOnlyField(source = 'patient.user.username')
     clinic  = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = Appointment
-        fields = ['id','clinic_doctor', 'patient', 'start_time', 'end_time', 'status', 'patientUsername', 'clinicDoctorID', 'disease' ,'clinic']  
+        fields = ['id','clinic_doctor', 'start_time', 'end_time', 'status', 'clinicDoctorID' ,'clinic']  
         extra_kwargs = {
             'patient': {'write_only': True},
             'clinic_doctor': {'write_only': True},
         }
     def get_clinic(self , obj):
         return ClinicSerializer(obj.clinic_doctor.clinic).data
+
 
 class PatientAppointmentSerializer(serializers.ModelSerializer):
 

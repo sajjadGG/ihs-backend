@@ -1,4 +1,6 @@
 from rest_framework import authentication, permissions, status, viewsets
+import io
+from rest_framework.parsers import JSONParser
 
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
@@ -158,20 +160,35 @@ class CustomObtainAuthToken(ObtainAuthToken):
         if(len(qsp)>0):
             serializerDetail = PatientSerializer(qsp[0])
             typeDetail = 'patient'
-            qsa = Appointment.objects.filter(patient = qsp[0])
+            qsa = Appointment.objects.filter(patient = qsp[0]).order_by('start_time')
+            dic_info = {}
             if len(qsa)>5:
                 appointmentSerializer = PatientAppointmentSerializer(qsa[:5] , many=True)
+                f_qsa = qsa[:5]
+                for i in f_qsa:
+                    dic_info['%s' %(i.start_time.strftime('%B%d'))] = 'at %s with Dr. %s' %(i.start_time.strftime('%H:%M'), i.clinic_doctor.doctor)
+                
             else:
                 appointmentSerializer = PatientAppointmentSerializer(qsa , many=True)
+                for i in qsa:
+                    dic_info['%s' %(i.start_time.strftime('%B%d'))] = 'at %s with Dr. %s' %(i.start_time.strftime('%H:%M'), i.clinic_doctor.doctor)
+
         else:
             serializerDetail = DoctorSerializer(qsd[0])
             typeDetail = 'doctor'
             qsa = Appointment.objects.filter(clinic_doctor__doctor = qsd[0])
+            dic_info = {}
             if len(qsa)>5:
                 appointmentSerializer = DoctorAppointmentSerializer(qsa[:5] , many=True)
+                f_qsa = qsa[:5]
+                for i in f_qsa:
+                    dic_info['%s' %(i.start_time.strftime('%B%d'))] = 'at %s with patient %s' %(i.start_time.strftime('%H:%M'), i.patient)
             else:
                 appointmentSerializer = DoctorAppointmentSerializer(qsa , many=True)
-        return Response({'token': token.key, 'type':typeDetail, 'user': serializer.data , 'detail' : serializerDetail.data, 'appointment' : appointmentSerializer.data, 'follower': followerSerializer.data})
+                for i in qsa:
+                    dic_info['%s' %(i.start_time.strftime('%B%d'))] = 'at %s with patient %s' %(i.start_time.strftime('%H:%M'), i.patient)
+
+        return Response({'token': token.key, 'type':typeDetail, 'user': serializer.data , 'detail' : serializerDetail.data, 'appointment' : appointmentSerializer.data, 'follower': followerSerializer.data, 'alter_appointment': dic_info})
 
 
 # class EmailViewSet(DefaultsMixin , viewsets.ModelViewSet):
@@ -251,6 +268,8 @@ class SpecialityViewSet(DefaultsMixin, viewsets.ModelViewSet):
 class MedicineViewSet(DefaultsMixin, viewsets.ModelViewSet):
     queryset = Medicine.objects.all()
     serializer_class = MedicineSerializer
+
+
 class NotificationViewSet(DefaultsMixin , viewsets.ModelViewSet):
     queryset = Notification.objects.order_by('time_created')
     serializer_class = NotificationSerializer
