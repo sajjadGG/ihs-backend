@@ -8,7 +8,6 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from core.serializers import NotificationSerializer
 
-
 User = get_user_model()
 
 class ChatConsumer(AsyncWebsocketConsumer):
