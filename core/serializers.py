@@ -81,6 +81,7 @@ class PatientSerializer(serializers.ModelSerializer):
         'insurance' , 'supplementalInsurance' , 'weight' , 'height'  , 'owner' ,'avatar' , 'phone_number' , 'useremail' , 'userfullname' , 'userId')
         read_only_fields = ('useremail' , 'userfullname' , 'userId')
 
+
     #TODO : restrict reviewer and reviewee to patient and doctor
 class ReviewSerializer(serializers.ModelSerializer):
     # reviewer = serializers.SlugRelatedField(slug_field = User.USERNAME_FIELD,
@@ -187,6 +188,7 @@ class DoctorAppointmentSerializer(serializers.ModelSerializer):
 class PatientAppointmentSerializer(serializers.ModelSerializer):
     clinicDoctorID = serializers.ReadOnlyField(source = 'clinic_doctor.id') 
     patientUsername = serializers.ReadOnlyField(source = 'patient.user.username')
+
 
     
     class Meta:

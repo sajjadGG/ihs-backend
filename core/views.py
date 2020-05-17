@@ -1,4 +1,6 @@
 from rest_framework import authentication, permissions, status, viewsets
+import io
+from rest_framework.parsers import JSONParser
 
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
@@ -155,11 +157,18 @@ class CustomObtainAuthToken(ObtainAuthToken):
         if(len(qsp)>0):
             serializerDetail = PatientSerializer(qsp[0])
             typeDetail = 'patient'
-            qsa = Appointment.objects.filter(patient = qsp)
+            qsa = Appointment.objects.filter(patient = qsp).order_by('start_time')
             if len(qsa)>5:
                 appointmentSerializer = PatientAppointmentSerializer(qsa[:5])
+                f_qsa = qsa[:5]
+                dic_info = {}
+                for i in f_qsa:
+                    dic_info['%s' %(i.start_time.strftime('%B %d'))] = 'at %s with Dr. %s' %(i.start_time.strftime('%H'), i.clinic_doctor)
+                
             else:
                 appointmentSerializer = PatientAppointmentSerializer(qsa)
+                for i in qsa:
+                    dic_info['%s' %(i.start_time.strftime('%B %d'))] = 'at %s with Dr. %s' %(i.start_time.strftime('%H'), i.clinic_doctor)
         else:
             serializerDetail = DoctorSerializer(qsd[0])
             typeDetail = 'doctor'
@@ -168,7 +177,8 @@ class CustomObtainAuthToken(ObtainAuthToken):
                 appointmentSerializer = DoctorAppointmentSerializer(qsa[:5])
             else:
                 appointmentSerializer = DoctorAppointmentSerializer(qsa)
-        return Response({'token': token.key, 'type':typeDetail, 'user': serializer.data , 'detail' : serializerDetail.data, 'appointment' : appointmentSerializer.data, 'follower': followerSerializer.data})
+        return Response({'token': token.key, 'type':typeDetail, 'user': serializer.data , 'detail' : serializerDetail.data,
+         'appointment' : appointmentSerializer.data, 'follower': followerSerializer.data})
 
 
 # class EmailViewSet(DefaultsMixin , viewsets.ModelViewSet):
