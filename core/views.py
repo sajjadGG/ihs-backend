@@ -166,12 +166,12 @@ class CustomObtainAuthToken(ObtainAuthToken):
                 appointmentSerializer = PatientAppointmentSerializer(qsa[:5] , many=True)
                 f_qsa = qsa[:5]
                 for i in f_qsa:
-                    dic_info['%s' %(i.start_time.strftime('%B %d'))] = 'at %s with Dr. %s' %(i.start_time.strftime('%H:%M'), i.clinic_doctor.doctor)
+                    dic_info['%s' %(i.start_time.strftime('%B%d'))] = 'at %s with Dr. %s' %(i.start_time.strftime('%H:%M'), i.clinic_doctor.doctor)
                 
             else:
                 appointmentSerializer = PatientAppointmentSerializer(qsa , many=True)
                 for i in qsa:
-                    dic_info['%s' %(i.start_time.strftime('%B %d'))] = 'at %s with Dr. %s' %(i.start_time.strftime('%H:%M'), i.clinic_doctor.doctor)
+                    dic_info['%s' %(i.start_time.strftime('%B%d'))] = 'at %s with Dr. %s' %(i.start_time.strftime('%H:%M'), i.clinic_doctor.doctor)
 
         else:
             serializerDetail = DoctorSerializer(qsd[0])
@@ -182,11 +182,11 @@ class CustomObtainAuthToken(ObtainAuthToken):
                 appointmentSerializer = DoctorAppointmentSerializer(qsa[:5] , many=True)
                 f_qsa = qsa[:5]
                 for i in f_qsa:
-                    dic_info['%s' %(i.start_time.strftime('%B %d'))] = 'at %s with patient %s' %(i.start_time.strftime('%H:%M'), i.patient)
+                    dic_info['%s' %(i.start_time.strftime('%B%d'))] = 'at %s with patient %s' %(i.start_time.strftime('%H:%M'), i.patient)
             else:
                 appointmentSerializer = DoctorAppointmentSerializer(qsa , many=True)
                 for i in qsa:
-                    dic_info['%s' %(i.start_time.strftime('%B %d'))] = 'at %s with patient %s' %(i.start_time.strftime('%H:%M'), i.patient)
+                    dic_info['%s' %(i.start_time.strftime('%B%d'))] = 'at %s with patient %s' %(i.start_time.strftime('%H:%M'), i.patient)
 
         return Response({'token': token.key, 'type':typeDetail, 'user': serializer.data , 'detail' : serializerDetail.data, 'appointment' : appointmentSerializer.data, 'follower': followerSerializer.data, 'alter_appointment': dic_info})
 
