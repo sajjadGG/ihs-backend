@@ -168,9 +168,9 @@ class CustomObtainAuthToken(ObtainAuthToken):
             typeDetail = 'doctor'
             qsa = Appointment.objects.filter(clinic_doctor__doctor = qsd[0])
             if len(qsa)>5:
-                appointmentSerializer = DoctorAppointmentSerializer(qsa[:5])
+                appointmentSerializer = DoctorAppointmentSerializer(qsa[:5] , many=True)
             else:
-                appointmentSerializer = DoctorAppointmentSerializer(qsa)
+                appointmentSerializer = DoctorAppointmentSerializer(qsa , many=True)
         return Response({'token': token.key, 'type':typeDetail, 'user': serializer.data , 'detail' : serializerDetail.data, 'appointment' : appointmentSerializer.data, 'follower': followerSerializer.data})
 
 

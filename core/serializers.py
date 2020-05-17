@@ -211,7 +211,8 @@ class DoctorAppointmentSerializer(serializers.ModelSerializer):
             'patient': {'write_only': True},
             'clinic_doctor': {'write_only': True},
         }
-
+    def get_clinic(self , obj):
+        return ClinicSerializer(obj.clinic_doctor.clinic).data
 
 class PatientAppointmentSerializer(serializers.ModelSerializer):
     clinicDoctorID = serializers.ReadOnlyField(source = 'clinic_doctor.id') 
