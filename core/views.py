@@ -151,22 +151,22 @@ class CustomObtainAuthToken(ObtainAuthToken):
         data = User.objects.get(username=request.POST.get('username'))
         serializer= UserSerializer(data)
         follow = Follower.objects.filter(followee = data)
-        followerSerializer = FollowerSerializer(follow)
+        followerSerializer = FollowerSerializer(follow ,many=True)
         qsp = Patient.objects.filter(user = data)
         qsd = Doctor.objects.filter(user = data)
         typeDetail = 'patient'
         if(len(qsp)>0):
             serializerDetail = PatientSerializer(qsp[0])
             typeDetail = 'patient'
-            qsa = Appointment.objects.filter(patient = qsp)
+            qsa = Appointment.objects.filter(patient = qsp[0])
             if len(qsa)>5:
-                appointmentSerializer = PatientAppointmentSerializer(qsa[:5])
+                appointmentSerializer = PatientAppointmentSerializer(qsa[:5] , many=True)
             else:
-                appointmentSerializer = PatientAppointmentSerializer(qsa)
+                appointmentSerializer = PatientAppointmentSerializer(qsa , many=True)
         else:
             serializerDetail = DoctorSerializer(qsd[0])
             typeDetail = 'doctor'
-            qsa = Appointment.objects.filter(clinic_doctor__doctor = qsd)
+            qsa = Appointment.objects.filter(clinic_doctor__doctor = qsd[0])
             if len(qsa)>5:
                 appointmentSerializer = DoctorAppointmentSerializer(qsa[:5])
             else:
