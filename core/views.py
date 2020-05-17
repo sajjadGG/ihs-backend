@@ -22,7 +22,7 @@ from .serializers import (
     DiseaseSerializer,
     SpecialitySerializer,
     MedicineSerializer,
-    NotificationSerializer)
+    NotificationSerializer,)
 
 from .mixins import DefaultsMixin, OwnerMixin
 

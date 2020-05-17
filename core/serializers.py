@@ -179,13 +179,17 @@ class ClinicDoctorSerializer(serializers.ModelSerializer):
         fields = ['clinic', 'doctor', 'clinicName', 'doctorUsername']
 
 
+
 class DoctorAppointmentSerializer(serializers.ModelSerializer):
     clinicDoctorID = serializers.ReadOnlyField(source = 'clinic_doctor.id') 
+    patientUsername = serializers.ReadOnlyField(source = 'patient.user.username')
+    clinic  = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = Appointment
-        fields = ['id','clinic_doctor', 'start_time', 'end_time', 'status', 'clinicDoctorID'] 
+        fields = ['id','clinic_doctor', 'patient', 'start_time', 'end_time', 'status', 'patientUsername', 'clinicDoctorID', 'disease' ,'clinic']  
         extra_kwargs = {
+            'patient': {'write_only': True},
             'clinic_doctor': {'write_only': True},
         }
 
@@ -193,15 +197,17 @@ class DoctorAppointmentSerializer(serializers.ModelSerializer):
 class PatientAppointmentSerializer(serializers.ModelSerializer):
     clinicDoctorID = serializers.ReadOnlyField(source = 'clinic_doctor.id') 
     patientUsername = serializers.ReadOnlyField(source = 'patient.user.username')
-
+    clinic  = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = Appointment
-        fields = ['id','clinic_doctor', 'patient', 'start_time', 'end_time', 'status', 'patientUsername', 'clinicDoctorID', 'disease']  
+        fields = ['id','clinic_doctor', 'patient', 'start_time', 'end_time', 'status', 'patientUsername', 'clinicDoctorID', 'disease' ,'clinic']  
         extra_kwargs = {
             'patient': {'write_only': True},
             'clinic_doctor': {'write_only': True},
         }
+    def get_clinic(self , obj):
+        return ClinicSerializer(obj.clinic_doctor.clinic).data
 
     def update(self , instance , validated_data):
         if validated_data["patient"] is not None:
