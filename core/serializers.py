@@ -215,6 +215,12 @@ class DoctorAppointmentSerializer(serializers.ModelSerializer):
         return ClinicSerializer(obj.clinic_doctor.clinic).data
 
 class PatientAppointmentSerializer(serializers.ModelSerializer):
+
+    def __init__(self, *args, **kwargs):
+        kwargs['partial'] = True
+        super(PatientAppointmentSerializer, self).__init__(*args, **kwargs)
+
+
     clinicDoctorID = serializers.ReadOnlyField(source = 'clinic_doctor.id') 
     patientUsername = serializers.ReadOnlyField(source = 'patient.user.username')
     clinic  = serializers.SerializerMethodField(read_only=True)
@@ -230,14 +236,23 @@ class PatientAppointmentSerializer(serializers.ModelSerializer):
         return ClinicSerializer(obj.clinic_doctor.clinic).data
 
     def update(self , instance , validated_data):
-        if validated_data["patient"] is not None:
-            appointment_reserved.send(sender = self.__class__ , clinic_doctor = instance.clinic_doctor , patient = validated_data['patient'] , 
+        user = self.context['request'].user
+        patient = Patient.objects.filter(user = user)[0]
+        if validated_data['status']=='R':
+            appointment_reserved.send(sender = self.__class__ , clinic_doctor = instance.clinic_doctor , patient = patient , 
             status = validated_data['status'])
-        elif instance.patient is not None:
+            instance.status = validated_data['status']
+            instance.patient = patient
+            instance.save()
+        elif validated_data['status']=='O':
             print(instance.patient)
             appointment_reserved.send(sender = self.__class__ , clinic_doctor = instance.clinic_doctor , patient = instance.patient , 
             status = validated_data['status'])
-        return super(PatientAppointmentSerializer , self).update(instance , validated_data)
+            instance.status = 'O'
+            instance.patient = None
+            instance.save()
+        # return super(PatientAppointmentSerializer , self).update(instance , validated_data) 
+        return instance
 
 
 
